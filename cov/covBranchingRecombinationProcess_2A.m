@@ -28,20 +28,34 @@ if nargin<4                                                        % covariances
         K(ind2,ind2) = K(ind2,ind2)+K3;        
         K = diag(K);
      else        
-    if  xeqz   
+        if  xeqz   
         K    = covSEiso([hyp(11),hyp(12)],x(:,1));
         K2   = feval(covN1{:}, [locationb,steepness1b,location,steepness1,hyp(7),hyp(8)],  x(ind1,1));
         K3   = feval(covN1{:}, [locationb,steepness2b,location,steepness2,hyp(9),hyp(10)], x(ind2,1));
-        try,K(ind1,ind1) = K(ind1,ind1)+K2;end
-        try,K(ind2,ind2) = K(ind2,ind2)+K3; end       
+        
+        if isempty(ind1)==0
+            K(ind1,ind1) = K(ind1,ind1)+K2;
+        end
+        
+        if isempty(ind2)==0
+            K(ind2,ind2) = K(ind2,ind2)+K3; 
+        end
+        
     else %Cross covariances
         ind3 = find(z(:,2)==1);
         ind4 = find(z(:,2)==2);        
         K    = covSEiso([hyp(11),hyp(12)],x(:,1),z(:,1));
         K2   = feval(covN1{:}, [locationb,steepness1b,location,steepness1,hyp(7),hyp(8)], x(ind1,1),z(ind3,1));
         K3   = feval(covN1{:}, [locationb,steepness2b,location,steepness2,hyp(9),hyp(10)], x(ind2,1),z(ind4,1));
-        try,K(ind1,ind3) = K(ind1,ind3)+K2;end
-        try,K(ind2,ind4) = K(ind2,ind4)+K3;end        
+
+        if isempty(ind1)==0 & isempty(ind3)==0
+            K(ind1,ind3) = K(ind1,ind3)+K2;
+        end
+        
+        if isempty(ind2)==0 & isempty(ind4)==0
+            K(ind2,ind4) = K(ind2,ind4)+K3;
+        end
+        
     end
     
 end

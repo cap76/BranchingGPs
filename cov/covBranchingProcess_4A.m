@@ -27,74 +27,102 @@ if nargin<4 %Covariances
 
     if dg    
         K     = feval(k1{:},[hyp(19),hyp(20)],x(:,1)); %Base process
-
-        K_l1   = feval(covN1{:}, [location1,steepness1,hyp(7),hyp(8)], x([ind1;ind2],1)); %Latent process branch 1/2
-        K_l2   = feval(covN1{:}, [location1,steepness1,hyp(9),hyp(10)], x([ind3;ind4],1));%Latent process branch 3/4
-       
-        K1   = feval(covN1{:},  [location2,steepness2,hyp(11),hyp(12)], x(ind1,1)); %Branch 1
-        K2   = feval(covN1{:},  [location2,steepness2,hyp(13),hyp(14)], x(ind2,1)); %Branch 2
-        
-        K3   = feval(covN1{:},  [location3,steepness3,hyp(15),hyp(16)], x(ind3,1)); %Branch 3
-        K4   = feval(covN1{:},  [location3,steepness3,hyp(17),hyp(18)], x(ind4,1)); %Branch 4
                 
+       if isempty([ind1;ind2])==0
+        K_l1   = feval(covN1{:}, [location1,steepness1,hyp(7),hyp(8)], x([ind1;ind2],1)); %Latent process branch 1/2        
         K([ind1;ind2],[ind1;ind2]) = K([ind1;ind2],[ind1;ind2])+K_l1;
+        
+            if isempty(ind1)==0
+                K1   = feval(covN1{:},  [location2,steepness2,hyp(11),hyp(12)], x(ind1,1)); %Branch 1
+                K(ind1,ind1) = K(ind1,ind1)+K1;
+            end        
+            
+            if isempty(ind2)==0
+                K2   = feval(covN1{:},  [location2,steepness2,hyp(13),hyp(14)], x(ind2,1)); %Branch 2
+                K(ind2,ind2) = K(ind2,ind2)+K2;
+            end 
+       end
+        
+        if isempty([ind3;ind4])==0
+        K_l2   = feval(covN1{:}, [location1,steepness1,hyp(9),hyp(10)], x([ind3;ind4],1));%Latent process branch 3/4            
         K([ind3;ind4],[ind3;ind4]) = K([ind3;ind4],[ind3;ind4])+K_l2;        
-
-        K(ind1,ind1) = K(ind1,ind1)+K1;
-        K(ind2,ind2) = K(ind2,ind2)+K2;
-        K(ind3,ind3) = K(ind3,ind3)+K3;                
-        K(ind4,ind4) = K(ind4,ind4)+K4;                                    
+            
+            if isempty(ind3)==0
+                K3   = feval(covN1{:},  [location3,steepness3,hyp(15),hyp(16)], x(ind3,1)); %Branch 3
+                K(ind3,ind3) = K(ind3,ind3)+K3;
+            end        
+            if isempty(ind4)==0
+                K4   = feval(covN1{:},  [location3,steepness3,hyp(17),hyp(18)], x(ind4,1)); %Branch 4
+                K(ind4,ind4) = K(ind4,ind4)+K4;  
+            end
+        end                                        
         
         K            = diag(K);
     else        
         if  xeqz   
         
-        K    = feval(k1{:},[hyp(19),hyp(20)],x(:,1));
-              
-        K_l1  = feval(covN1{:}, [location1,steepness1,hyp(7),hyp(8)], x([ind1;ind2],1));
-        K_l2  = feval(covN1{:}, [location1,steepness1,hyp(9),hyp(10)], x([ind3;ind4],1));   
-        
-        K1   = feval(covN1{:}, [location2,steepness2,hyp(11),hyp(12)], x(ind1,1));
-        K2   = feval(covN1{:}, [location2,steepness2,hyp(13),hyp(14)], x(ind2,1));
-        
-        K3   = feval(covN1{:}, [location3,steepness3,hyp(15),hyp(16)], x(ind3,1));
-        K4   = feval(covN1{:}, [location3,steepness3,hyp(17),hyp(18)], x(ind4,1));                 
-        
+         K     = feval(k1{:},[hyp(19),hyp(20)],x(:,1)); %Base process
+                
+       if isempty([ind1;ind2])==0
+        K_l1   = feval(covN1{:}, [location1,steepness1,hyp(7),hyp(8)], x([ind1;ind2],1)); %Latent process branch 1/2        
         K([ind1;ind2],[ind1;ind2]) = K([ind1;ind2],[ind1;ind2])+K_l1;
+            if isempty(ind1)==0
+                K1   = feval(covN1{:},  [location2,steepness2,hyp(11),hyp(12)], x(ind1,1)); %Branch 1
+                K(ind1,ind1) = K(ind1,ind1)+K1;
+            end        
+            if isempty(ind2)==0
+                K2   = feval(covN1{:},  [location2,steepness2,hyp(13),hyp(14)], x(ind2,1)); %Branch 2
+                K(ind2,ind2) = K(ind2,ind2)+K2;
+            end 
+       end
+        
+        if isempty([ind3;ind4])==0
+        K_l2   = feval(covN1{:}, [location1,steepness1,hyp(9),hyp(10)], x([ind3;ind4],1));%Latent process branch 3/4            
         K([ind3;ind4],[ind3;ind4]) = K([ind3;ind4],[ind3;ind4])+K_l2;        
-
-        K(ind1,ind1) = K(ind1,ind1)+K1;
-        K(ind2,ind2) = K(ind2,ind2)+K2;
-        K(ind3,ind3) = K(ind3,ind3)+K3;                
-        K(ind4,ind4) = K(ind4,ind4)+K4;
+            if isempty(ind3)==0
+                K3   = feval(covN1{:},  [location3,steepness3,hyp(15),hyp(16)], x(ind3,1)); %Branch 3
+                K(ind3,ind3) = K(ind3,ind3)+K3;
+            end        
+            if isempty(ind4)==0
+                K4   = feval(covN1{:},  [location3,steepness3,hyp(17),hyp(18)], x(ind4,1)); %Branch 4
+                K(ind4,ind4) = K(ind4,ind4)+K4;  
+            end
+        end 
         
         else %Cross covariances
         ind5 = find(z(:,2)==1);
         ind6 = find(z(:,2)==2);
         ind7 = find(z(:,2)==3);
-        ind8 = find(z(:,2)==4);        
+        ind8 = find(z(:,2)==4);                
         
-        K   = feval(k1{:},[hyp(19),hyp(20)],x(:,1),z(:,1)); 
-        
-        K_l1   = feval(covN1{:}, [location1,steepness1,hyp(7),hyp(8)], x([ind1;ind2],1),z([ind5;ind6],1));
-        K_l2   = feval(covN1{:}, [location1,steepness1,hyp(9),hyp(10)], x([ind3;ind4],1),z([ind7;ind8],1));        
+        K     = feval(k1{:},[hyp(19),hyp(20)],x(:,1),z(:,1)); %Base process
                 
-        K1   = feval(covN1{:}, [location2,steepness2,hyp(11),hyp(12)], x(ind1,1),z(ind5,1));
-        K2   = feval(covN1{:}, [location2,steepness2,hyp(13),hyp(14)], x(ind2,1),z(ind6,1));
-        
-        K3   = feval(covN1{:}, [location3,steepness3,hyp(15),hyp(16)], x(ind3,1),z(ind7,1));
-        K4   = feval(covN1{:}, [location3,steepness3,hyp(17),hyp(18)], x(ind4,1),z(ind8,1)); 
-        
-        
-        try,K([ind1;ind2],[ind5;ind6]) = K([ind1;ind2],[ind5;ind6])+K_l1;end
-        try,K([ind3;ind4],[ind7;ind8]) = K([ind3;ind4],[ind7;ind8])+K_l2;end        
+       if isempty([ind1;ind2])==0 & isempty([ind5;ind6])==0
+        K_l1   = feval(covN1{:}, [location1,steepness1,hyp(7),hyp(8)], x([ind1;ind2],1),z([ind5;ind6],1)); %Latent process branch 1/2        
+        K([ind1;ind2],[ind5;ind6]) = K([ind1;ind2],[ind5;ind6])+K_l1;
 
-        %Use if statments rather than try
-        try,K(ind1,ind5) = K(ind1,ind5)+K1;end
-        try,K(ind2,ind6) = K(ind2,ind6)+K2;end
-        try,K(ind3,ind7) = K(ind3,ind7)+K3;end               
-        try,K(ind4,ind8) = K(ind4,ind8)+K4;end
+            if isempty(ind1)==0 & isempty(ind5)==0
+                K1   = feval(covN1{:},  [location2,steepness2,hyp(11),hyp(12)], x(ind1,1),z(ind5,1)); %Branch 1
+                K(ind1,ind5) = K(ind1,ind5)+K1;
+            end        
+            if isempty(ind2)==0 & isempty(ind6)==0
+                K2   = feval(covN1{:},  [location2,steepness2,hyp(13),hyp(14)], x(ind2,1),z(ind6,1)); %Branch 2
+                K(ind2,ind6) = K(ind2,ind6)+K2;
+            end 
+       end
         
+        if isempty([ind3;ind4])==0 & isempty([ind7;ind8])==0
+        K_l2   = feval(covN1{:}, [location1,steepness1,hyp(9),hyp(10)], x([ind3;ind4],1),z([ind7;ind8],1));%Latent process branch 3/4            
+        K([ind3;ind4],[ind7;ind8]) = K([ind3;ind4],[ind7;ind8])+K_l2;        
+            if isempty(ind3)==0 & isempty(ind7)==0
+                K3   = feval(covN1{:},  [location3,steepness3,hyp(15),hyp(16)], x(ind3,1),z(ind7,1)); %Branch 3
+                K(ind3,ind7) = K(ind3,ind7)+K3;
+            end        
+            if isempty(ind4)==0 & isempty(ind8)==0
+                K4   = feval(covN1{:},  [location3,steepness3,hyp(17),hyp(18)], x(ind4,1),z(ind8,1)); %Branch 4
+                K(ind4,ind8) = K(ind4,ind8)+K4;  
+            end
+        end                        
               
         end
 end

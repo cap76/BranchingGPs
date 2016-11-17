@@ -1,5 +1,9 @@
-addpath(genpath('/Users/christopher_penfold/Desktop/Code/gpss-research/source/gpml'))
-addpath(genpath('/Users/christopher_penfold/Desktop/Code/deepGP/netlab3_3/'))
+%Demo plot showing different examples of branching/recombination GPs possible 
+%via composition of different base kernels with changepoint kernels.
+
+addpath(genpath('../'))
+%addpath(genpath('/Users/christopher_penfold/Desktop/Code/gpss-research/source/gpml'))
+%addpath(genpath('/Users/christopher_penfold/Desktop/Code/deepGP/netlab3_3/'))
 x = linspace(0,10,100);
 
 covN1 = {@covChangePointMultiD, {1, @covZero, @covSEiso}};
@@ -60,7 +64,7 @@ subplot(4,3,8);plot(x,real(y(2,1:100))','b'),hold on, plot(x,real(y(2,101:200))'
 subplot(4,3,7); imagesc(Kall),set(gca,'XTick',[],'YTick',[])
 hFig1.PaperUnits = 'centimeters';
 hFig1.PaperPosition = [0 0 8.6 15.0];
-print('../Plot1','-dpng','-r0')
+print('./results/plots/Plot1','-dpng','-r0')
 
 
 %covN2 = {@covChangePointMultiD, {1, {@covChangePointMultiD, {1, @covZero, @covNoise}}, @covZero}};
@@ -145,7 +149,7 @@ subplot(4,3,10); imagesc(Kall),set(gca,'XTick',[],'YTick',[])
 
 hFig1.PaperUnits = 'centimeters';
 hFig1.PaperPosition = [0 0 8.6 15.0];
-print('../Plot2','-dpng','-r0')
+print('./results/plots/Plot2','-dpng','-r0')
 
 
 hFig1 = figure(3)
@@ -223,7 +227,7 @@ subplot(4,3,10); imagesc(Kall),set(gca,'XTick',[],'YTick',[])
 
 hFig1.PaperUnits = 'centimeters';
 hFig1.PaperPosition = [0 0 8.6 15.0];
-print('../Plot3','-dpng','-r0')
+print('./results/plots/Plot3','-dpng','-r0')
 
 hFig1 = figure(4)
 covN2 = {@covChangePointMultiD, {1, {@covChangePointMultiD, {1, @covZero, @covNoise}}, @covZero}};
@@ -259,7 +263,7 @@ subplot(1,3,1); imagesc(Kall),set(gca,'XTick',[],'YTick',[])
 
 hFig1.PaperUnits = 'centimeters';
 hFig1.PaperPosition = [0 0 8.6 3.0];
-print('../Plot4','-dpng','-r0')
+print('./results/plots/Plot4','-dpng','-r0')
 
 return
 

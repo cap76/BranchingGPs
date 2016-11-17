@@ -1,9 +1,12 @@
-function [Dist Lout] = test_Branching_GP2_test2(arc);
+function [Dist Lout] = test_Branching_GP2_test2(seed,plt);
 
-rng(arc)
+rng(seed)
 
-addpath(genpath('/Users/christopher_penfold/Desktop/Code/gpss-research/source/gpml'))
-addpath(genpath('/Users/christopher_penfold/Desktop/Code/deepGP/netlab3_3/'))
+addpath(genpath('../'))
+%addpath(genpath('/Users/christopher_penfold/Desktop/Code/gpss-research/source/gpml'))
+%addpath(genpath('/Users/christopher_penfold/Desktop/Code/deepGP/netlab3_3/'))
+
+%First generate data for a simple branching process.
 xreal = linspace(-8,8,3000);
 yreal1 = zeros(1,3000);
 yreal1(find(xreal>=-pi/2 & xreal<=0)) = cos(xreal(find(xreal>=-pi/2 & xreal<=0)));
@@ -14,10 +17,8 @@ yreal2(find(xreal>=-pi/2 & xreal<=0)) = -cos(xreal(find(xreal>=-pi/2 & xreal<=0)
 yreal2(find(xreal>0)) = -ones;
 
 count = 0;
-x = randn(300,1)*3;
-%x = x(find(x<0));
-%x = x(1:300);
 
+x = randn(300,1)*3;
 for i = 1:length(x);
 if x(i)<-pi/2
     y(i) = 0;
@@ -27,7 +28,6 @@ if x(i)<-pi/2
     t(i) = 2;
     end
 elseif x(i)>0 
-%y(i) = 0;
 if rand(1,1)<0.5
 y(i) = 1;
 t(i) = 1;
@@ -47,39 +47,25 @@ end
 end
 end
 y = y+randn(1,300)*0.1;
-%plot(x,y,'o')
-
-
-%keyboard
-
-
-%t = zeros(300,1);
-%if  x(i)<-pi/2
-%t(find(y>0))=2;
-%t(find(y<=0))=1;
-
 X = [x,t'];
-
-%[Y,I]=sort(X(:,2));
 [Y,I] = sortrows(X,[2,1]);
 t = t(I);
 X = X(I,:);
-%X = [x',ones(300,1);x',2*ones(300,1)];
-%y = real(gsamp(zeros(1,300),Kall,10));
 Y = y';
 Y = Y(I);
-%Y = y(1,1:300)' + rand(length(y(1,1:300)),1)*1;
 Xstar = [linspace(-8,8,3000)',ones(3000,1);linspace(-8,8,3000)',2*ones(3000,1)];
- u = log(rand(6,1));
-hyp.cov = [4;0.5;0.5;u];%[3,0.5,0.5,1,3,0.3,2,2,2]';
+
+%Fit a two-component branching process
+u = log(rand(6,1));
+hyp.cov = [4;0.5;0.5;u];
 hyp.mean = mean(X(:,1));
 hyp.lik = log(.2);
 
-hyp_pN      = feval(@minimize, hyp, @gp, -30000, @infExact, 'meanConst','covBranchingProcess_v2','likGauss',X,Y);
-[ymu ys2 fmu fs2   ] = gp(hyp_pN, 'infExact', 'meanConst', 'covBranchingProcess_v2', 'likGauss', X, Y, Xstar);
-[L dL   ] = gp(hyp_pN, 'infExact', 'meanConst', 'covBranchingProcess_v2', 'likGauss', X, Y);
-%[ymu ys2 fmu fs2   ] = gp(hyp, 'infExact', 'meanConst', 'covBranchingProcess', 'likGauss', X, Y, X);
+hyp_pN      = feval(@minimize, hyp, @gp, -30000, @infExact, 'meanConst','covBranchingProcess_2B','likGauss',X,Y);
+[ymu ys2 fmu fs2   ] = gp(hyp_pN, 'infExact', 'meanConst', 'covBranchingProcess_2B', 'likGauss', X, Y, Xstar);
+[L dL   ] = gp(hyp_pN, 'infExact', 'meanConst', 'covBranchingProcess_2B', 'likGauss', X, Y);
 
+if plt==1
 subplot(1,3,1);
 z = Xstar(1:3000,1);
 f = [fmu(1:3000)+2*sqrt(ys2(1:3000)); flipdim(fmu(1:3000)-2*sqrt(ys2(1:3000)),1)]; 
@@ -92,8 +78,8 @@ plot(Xstar(1:3000,1),fmu(1:3000),'k-')
 plot(Xstar(3001:end,1),fmu(3001:end),'k-')
 plot(X(find(t==1),1),Y(find(t==1)),'ro'),
 plot(X(find(t==2),1),Y(find(t==2)),'bo')
+end
 
-keyboard
 Dist(1,:) = ((fmu(1:3000)-yreal1').^2);
 Dist(2,:) = ((fmu(3001:end)-yreal2').^2);
 
@@ -102,14 +88,14 @@ X1 = X(find(X(:,2)==1),1);
 X2 = X(find(X(:,2)==2),1);
 Y1 = Y(find(X(:,2)==1),1);
 Y2 = Y(find(X(:,2)==2),1);
-hyp.cov = u(1:2);%[log(rand(2,1))];%[3,0.5,0.5,1,3,0.3,2,2,2]';
+hyp.cov = u(1:2);
 hyp.mean = mean(X(find(X(:,2)==1),1));
 hyp.lik = log(.2);
 hyp_pN      = feval(@minimize, hyp, @gp, -30000, @infExact, 'meanConst','covSEiso','likGauss',X1,Y1);
 [ymu1 ys21 fmu1 fs21   ] = gp(hyp_pN, 'infExact', 'meanConst', 'covSEiso', 'likGauss', X1, Y1, unique(Xstar(:,1)));
 [L1 dL1   ] = gp(hyp_pN, 'infExact', 'meanConst', 'covSEiso', 'likGauss', X1, Y1);
 
-hyp.cov = u(1:2);%[log(rand(2,1))];%[3,0.5,0.5,1,3,0.3,2,2,2]';
+hyp.cov = u(3:4);
 hyp.mean = mean(X(find(X(:,2)==2),1));
 hyp.lik = log(.2);
 hyp_pN      = feval(@minimize, hyp, @gp, -30000, @infExact, 'meanConst','covSEiso','likGauss',X2,Y2);
@@ -119,8 +105,8 @@ hyp_pN      = feval(@minimize, hyp, @gp, -30000, @infExact, 'meanConst','covSEis
 Dist(3,:) = ((fmu1(1:3000)-yreal1').^2);
 Dist(4,:) = ((fmu2(1:3000)-yreal2').^2);
 
-
-hyp.cov = u(1:2);%[log(rand(2,1))];%[3,0.5,0.5,1,3,0.3,2,2,2]';
+%Joint GP
+hyp.cov = u(1:2);
 hyp.mean = mean(X(:,1));
 hyp.lik = log(.2);
 hyp_pN      = feval(@minimize, hyp, @gp, -30000, @infExact, 'meanConst','covSEiso','likGauss',X(:,1),Y);
@@ -130,10 +116,10 @@ hyp_pN      = feval(@minimize, hyp, @gp, -30000, @infExact, 'meanConst','covSEis
 Dist(5,:) = ((fmu3(1:3000)-yreal1').^2);
 Dist(6,:) = ((fmu3(1:3000)-yreal2').^2);
 
-
+%Return MLs
 Lout = [L,L1,L2,L3];
 
-% 
+ if plt==1 
  subplot(1,3,2);
  z = Xstar(1:3000,1);
  f = [fmu1(1:3000)+2*sqrt(ys21(1:3000)); flipdim(fmu1(1:3000)-2*sqrt(ys21(1:3000)),1)]; 
@@ -147,8 +133,6 @@ Lout = [L,L1,L2,L3];
  plot(X(find(t==1),1),Y(find(t==1)),'ro'),
  plot(X(find(t==2),1),Y(find(t==2)),'bo')
 
-
-% 
  subplot(1,3,3);
  z = Xstar(1:3000,1);
  f = [fmu3(1:3000)+2*sqrt(ys23(1:3000)); flipdim(fmu3(1:3000)-2*sqrt(ys23(1:3000)),1)]; 
@@ -158,67 +142,6 @@ Lout = [L,L1,L2,L3];
  plot(Xstar(1:3000,1),fmu2(1:end),'k-')
  plot(X(find(t==1),1),Y(find(t==1)),'ro'),
  plot(X(find(t==2),1),Y(find(t==2)),'bo')
+ end
 
-
-%Dist(3,:) = sqrt((fmu1(1:3000)-yreal1').^2);
-%Dist(4,:) = sqrt((fmu2(1:3000)-yreal2').^2);
-
-%keyboard
 return
-addpath('/Users/christopher_penfold/Downloads/ocsipackage/Functions/Other/')
-
-%Now try to infer with wrong labels
-Xtrue = X;
-t = Xtrue(:,2);
-
-X(find(X(:,1))>mean(X(:,1)),2) = 2;%randi([1 2],size(X,1),1);
-X(find(X(:,1))<=mean(X(:,1)),2) = 1;
-
-[Y,I]=sort(X(:,2));
-X = X(I,:);
-Y = Y(I);
-
-hyp.cov = [1;0.5;0.5;-1;0.5;0.5;log(rand(6,1))];
-hyp.mean = mean(X(:,1));
-hyp.lik = 2;
-
-hyp_pN      = feval(@minimize, hyp, @gp, -30000, @infExact, 'meanConst','covBranchingRecombinationProcess_v2','likGauss',X,Y);
-%[ymu ys2 fmu fs2   ] = gp(hyp_pN, 'infExact', 'meanConst', 'covBranchingRecombinationProcess_v2', 'likGauss', X, Y, Xstar);
-
-[L dL] = gp(hyp_pN, 'infExact', 'meanConst', 'covBranchingRecombinationProcess_v2', 'likGauss', X, Y);
-
-Po(1,1) = L;
-for i = 1:10000
-    for j = 1:size(X,1)
-        X1 = X;
-        X2 = X;
-        X1(j,2) = 1;
-        X2(j,2) = 2;
-    
-        [Y11,I1]=sort(X1(:,2));
-        [Y11,I2]=sort(X2(:,2));
-
-        X1 = X1(I1,:);
-        X2 = X2(I2,:);        
-        Y1 = Y(I1);
-        Y2 = Y(I2);
-        
-        [L1 dL] = gp(hyp_pN, 'infExact', 'meanConst', 'covBranchingRecombinationProcess_v2', 'likGauss', X1, Y1);
-        [L2 dL] = gp(hyp_pN, 'infExact', 'meanConst', 'covBranchingRecombinationProcess_v2', 'likGauss', X2, Y2);
-
-        po = [L1,L2];
-        po = exp(-po)./sum(exp(-po));
-        s = discreternd(po,1);
-
-        if s==1
-            X = X1;
-            Y = Y1;
-            Po(i,1) = L1;
-        else
-            X = X2;
-            Y = Y2;
-            Po(i,1) = L2;            
-        end
-        
-    end    
-end
