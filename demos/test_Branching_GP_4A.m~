@@ -15,15 +15,16 @@ Kall = covBranchingProcess_4A([3,0.5,5,0.5,6,0.5,2,1.8,2,1.8,2,1.8,2,1.8,2,1.8,2
 y = real(gsamp(zeros(1,4000),Kall,100));
 Y = y(seed,1:4000)' + rand(length(y(seed,1:4000)),1)*1;
 
-%Subsample the data for training a GP model.
+%Subsample the data
 X  = X(1:10:end,:);
 X0 = X0(1:10:end,:);
 Y  = Y(1:10:end,1);
 
-%Set prediction locations
+
+%Prediction locations
 Xstar = [linspace(0,10,1000)',ones(1000,1);linspace(0,10,1000)',2*ones(1000,1);linspace(0,10,1000)',3*ones(1000,1);linspace(0,10,1000)',4*ones(1000,1)];
 
-%Two-component GP test
+%Two component test
 Xstar0 = [linspace(0,10,1000)',ones(1000,1);linspace(0,10,1000)',ones(1000,1);linspace(0,10,1000)',2*ones(1000,1);linspace(0,10,1000)',2*ones(1000,1)];
 
 %Initialise hyperparameters for simple 2-branch model
@@ -36,7 +37,7 @@ hyp_pN0      = feval(@minimize, hyp0, @gp, -10000, @infExact, 'meanConst','covBr
 [ymu0 ys20 fmu0 fs20   ] = gp(hyp_pN0, 'infExact', 'meanConst', 'covBranchingProcess_2C', 'likGauss', X0, Y, Xstar0);
 [L0 dL  ] = gp(hyp_pN0, 'infExact', 'meanConst', 'covBranchingProcess_2C', 'likGauss', X0, Y);
 
-%Run a joint GP (over union of datasets)
+%Joint GP
 k1={'covMaterniso',3};
 hyp1.cov = [rand(2,1)];
 hyp1.mean = mean(X(find(X(:,2)==1),1));
@@ -47,7 +48,7 @@ hyp_pN1      = feval(@minimize, hyp1, @gp, -10000, @infExact, 'meanConst',k1,'li
 [ymu1 ys21 fmu1 fs21   ] = gp(hyp_pN1, 'infExact', 'meanConst', k1, 'likGauss', X0(:,1), Y, Xstar0(:,1));
 [L1 dL   ] = gp(hyp_pN1, 'infExact', 'meanConst', k1, 'likGauss', X0(:,1), Y);
 
-%Individual GPs of each branch
+%Individual GPs
 k1={'covMaterniso',3};
 hyp1.cov = [rand(2,1)];
 hyp1.mean = mean(X(find(X(:,2)==1),1));
@@ -84,7 +85,10 @@ hyp_pN1      = feval(@minimize, hyp1, @gp, -10000, @infExact, 'meanConst',k1,'li
 [L1D dL   ] = gp(hyp_pN1, 'infExact', 'meanConst', k1, 'likGauss', X(find(X(:,2)==4),1), Y(find(X(:,2)==4)));
 
 
-%Now do a 4-component GP.
+
+
+
+%4 component GP
 %Initialise hyperparameters
 hyp.cov = [6;0.5;6;0.5;7;0.5;7;0.5;6;0.5;6;0.5;rand(14,1)];%[3,0.5,0.5,1,3,0.3,2,2,2]';
 hyp.mean = mean(X(:,1));
@@ -95,9 +99,9 @@ hyp_pN      = feval(@minimize, hyp, @gp, -50000, @infExact, 'meanConst','covBran
 
 %Predictions
 [ymu ys2 fmu fs2   ] = gp(hyp_pN, 'infExact', 'meanConst', 'covBranchingProcess_4B', 'likGauss', X, Y, Xstar);
-[L dL   ] = gp(hyp_pN, 'infExact', 'meanConst', 'covBranchingProcess_4B', 'likGauss', X, Y); 
-
-%Now plot
+[L dL   ] = gp(hyp_pN, 'infExact', 'meanConst', 'covBranchingProcess_4B', 'likGauss', X, Y);
+% 
+% %Now plot
 if plt==1
  K = covBranchingProcess_4B(hyp_pN.cov, X);
  subplot(2,4,1); imagesc(K);
@@ -131,16 +135,16 @@ if plt==1
  title(['Independent GP'])
 end
 
-%Now get SSE over full range of testpoints
+%figure(2)
+%Now get SSE for missing data
 Dis1 = sum((y(1,:)' - fmu).^2);
 Dis2 = sum((y(1,:)' - fmu0).^2);
 Dis3 = sum((y(1,:)' - fmu1).^2);
 Dis4 = sum((y(1,:)' - [fmu1A;fmu1B;fmu1C;fmu1D]).^2);
+
 Dis = [Dis1,Dis2,Dis3,Dis4];
 Lout = [L,L0,L1,L1A,L1B,L1C,L1D];
 
-%Also plot SSE.
 if plt==1
-subplot(2,4,7); plot([1,2,3,4],[Dis1,Dis2,Dis3,Dis4],'o'), ylabel('SSE')
-subplot(2,4,7); plot([1,2,3,4],-[L,L0,L1,L1A+L1B+L1C+L1D],'o'),ylabel('ML')
+subplot(2,4,7); plot([1,2,3,4],[Dis1,Dis2,Dis3,Dis4],'o')
 end

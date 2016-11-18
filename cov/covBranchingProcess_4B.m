@@ -97,11 +97,12 @@ if nargin<4 %Covariances
         
         
         else %Cross covariances
+
         ind5 = find(z(:,2)==1);
         ind6 = find(z(:,2)==2);
         ind7 = find(z(:,2)==3);
-        ind8 = find(z(:,2)==4);                
-        
+        ind8 = find(z(:,2)==4);    
+         
         K     = feval(k1{:},[hyp(25),hyp(26)],x(:,1),z(:,1)); %Base process
                 
        if isempty([ind1;ind2])==0 & isempty([ind5;ind6])==0
@@ -148,10 +149,10 @@ ind4 = find(x(:,2)==4);
     K([ind1;ind2],[ind1;ind2])   = feval(covN1{:}, [location1,steepness1,hyp(13),hyp(14)],  x([ind1;ind2],1),x([ind1;ind2],1),2);      
  elseif i==3
     K = zeros(size(x,1),size(x,1));
-    K([ind3;ind4],[ind3;ind4])   = feval(covN1{:}, [location2,steepness2,hyp(15),hyp(16)],  x([ind1;ind2],1),x([ind1;ind2],1),1);      
+    K([ind3;ind4],[ind3;ind4])   = feval(covN1{:}, [location2,steepness2,hyp(15),hyp(16)],  x([ind3;ind4],1),x([ind3;ind4],1),1);      
   elseif i==4
     K = zeros(size(x,1),size(x,1));
-    K([ind3;ind4],[ind3;ind4])   = feval(covN1{:}, [location2,steepness2,hyp(15),hyp(16)],  x([ind1;ind2],1),x([ind1;ind2],1),2);              
+    K([ind3;ind4],[ind3;ind4])   = feval(covN1{:}, [location2,steepness2,hyp(15),hyp(16)],  x([ind3;ind4],1),x([ind3;ind4],1),2);              
   elseif i==5      
     K = zeros(size(x,1),size(x,1));
     K(ind1,ind1)   = feval(covN1{:}, [location3,steepness3,hyp(17),hyp(18)], x(ind1,1),x(ind1,1),1);

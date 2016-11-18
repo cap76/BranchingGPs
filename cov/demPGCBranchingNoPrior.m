@@ -3,6 +3,7 @@ function [Fin] = demPGCBranchingNoPrior(batchi);
 %Get branching process over PGC datasets. A four component system.
 
 addpath(genpath('../'))
+
 %addpath(genpath('../Pseudotime_Algorithms/Functions/gpml-matlab-v3.6-2015-07-07/'))
 %addpath(('./gpml/cov'))
 %addpath(genpath('./netlab3_3/'))
@@ -44,10 +45,15 @@ Xstar1 = [repmat(linspace(0,13,1000),1,4);ones(1,1000),2*ones(1,1000),3*ones(1,1
 
 for i = startind:endind
 
-l1 = log(3); l2 = log(3); lg = log(3); v1 = log(3); v2 = log(3); vg = log(std(Data.Y(:,i)));
+    
+    keyboard
+    
+%l1 = log(3); l2 = log(3); lg = log(3); v1 = log(3); v2 = log(3); vg = log(std(Data.Y(:,i)));
 
-hyp.cov  = [7;1.5;7;1.5;11;1.5;11;1.5;11;1.5;11;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5]; hyp.mean = mean(Data.Y(:,i)); hyp.lik  = 2;
-hyp_pN1 = feval(@minimize, hyp, @gp, -10000, 'infExact', 'meanConst','covBranchingProcess_4B','likGauss',Data.X,Data.Y(:,i));         % optimise
+hyp.cov  = [7;0.5;7;0.5;11;0.5;11;0.5;11;0.5;11;0.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5;1.5]; hyp.mean = mean(Data.Y(:,i)); hyp.lik  = 2;
+
+%hyp_pN  = feval(@minimize, hyp, @gp, -50000, @infExact, 'meanConst','covBranchingProcess_4B','likGauss',X,Y);
+hyp_pN1 = feval(@minimize, hyp, @gp, -10000, @infExact, 'meanConst','covBranchingProcess_4B','likGauss',Data.X,Data.Y(:,i));         % optimise
 [L1 dL1] = feval(@gp,hyp_pN1, 'infExact', 'meanConst','covBranchingProcess_4B','likGauss',Data.X,Data.Y(:,i));         % optimise
 [ymu1 ys21 fmu1 fs21   ]= feval(@gp,hyp_pN1, 'infExact', 'meanConst','covBranchingProcess_4B','likGauss',Data.X,Data.Y(:,i),Xstar1);
 
