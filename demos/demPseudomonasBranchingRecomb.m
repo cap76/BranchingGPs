@@ -7,23 +7,28 @@ addpath(genpath('../'))
 
 D1 = importdata('./Pa13-Combo2.txt');
 
-try %Try to resume analysis 
-    load(['./results/pseudomonas/PseudomonasResultsRecomb_Oct_5_' num2str(batchi) '_prior1.mat'])
-    startind = length(Ps)+1;
-    endind   = (batchi)*1000;
-catch
-    startind = (batchi-1)*1000 + 1;
-    endind   = (batchi)*1000;
-end
+%try %Try to resume analysis 
+%    load(['./results/pseudomonas/PseudomonasResultsRecomb_Oct_5_' num2str(batchi) '_prior1.mat'])
+%    startind = length(Ps)+1;
+%    endind   = (batchi)*1000;
+%catch
+%    startind = (batchi-1)*1000 + 1;
+%    endind   = (batchi)*1000;
+%end
+load('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasRecombinationResults.mat')
+%load('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasBranchingResults.mat')
 
+endind = length(PseudomonasRecomb);
 endind = min(endind,size(D1.data,1));
 tt = [0,2,3,4,6,7,8,10,11,12,14,16,17.5];
 X1 = [repmat(tt,1,8); ones(1,52),2*ones(1,52)]';
 
 Xstar1 = [repmat(linspace(0,17.5,50),1,2);ones(1,50),2*ones(1,50)]';
 
-for i = startind:endind
+for i = 1:length(PseudomonasRecomb)%startind:endind
 
+    if isempty(PseudomonasRecomb{i})
+    
 pcp1     = {@priorGamma,2,2};    % Gaussian prior
 pcp1p2   = {@priorGamma,4,2};    %Mean 8, std 16
 pcp2_2 = {@priorClamped};        % Gaussian prior
@@ -82,14 +87,17 @@ Output.fs21 = fs21;
 Output.fs23 = fs23;
 Output.fs27 = fs27;
 
-Ps{i,1} = Output;
+Pseudomonas{i,1} = Output;
+%Ps{i,1} = Output;
 
-if double(int64(i/10))==(i/10)
-    save(['./results/pseudomonas/PseudomonasResultsRecomb_Oct_5_' num2str(batchi) '.mat'],'Ps')
+%save(['./results/pseudomonas/PseudomonasResultsRecomb_Oct_5_' num2str(batchi) '.mat'],'Ps')
+save('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasRecombinationResults_complete.mat','PseudomonasRecomb')
+
+    end
+
 end
 
-end
-
-save(['./results/pseudomonas/PseudomonasResultsRecomb_Oct_5_' num2str(batchi) '.mat'],'Ps')
+save('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasRecombinationResults_complete.mat','PseudomonasRecomb')
+%save(['./results/pseudomonas/PseudomonasResultsRecomb_Oct_5_' num2str(batchi) '.mat'],'Ps')
 
 Fin = 1;
