@@ -1,6 +1,6 @@
 function K = covConvergingProcess_2A(hyp, x, z, i)
 
-
+%DUPLICATE
 % A two component converging process with squared exponential covariance functions.
 
 if nargin<2, K = '9'; return; end                  % report number of parameters

@@ -1,6 +1,7 @@
 function K = covBranchingProcess_4A(hyp, x, z, i)
 
-%A four component branching process (all branch from a latent process)
+%A four component branching process (all branch from a latent process). Does not 
+%yet work with FITC.
 
 if nargin<2, K = '20'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
