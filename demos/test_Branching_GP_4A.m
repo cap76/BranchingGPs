@@ -132,10 +132,10 @@ if plt==1
 end
 
 %Now get SSE over full range of testpoints
-Dis1 = sum((y(1,:)' - fmu).^2);
-Dis2 = sum((y(1,:)' - fmu0).^2);
-Dis3 = sum((y(1,:)' - fmu1).^2);
-Dis4 = sum((y(1,:)' - [fmu1A;fmu1B;fmu1C;fmu1D]).^2);
+Dis1 = sum((y(seed,:)' - fmu).^2);
+Dis2 = sum((y(seed,:)' - fmu0).^2);
+Dis3 = sum((y(seed,:)' - fmu1).^2);
+Dis4 = sum((y(seed,:)' - [fmu1A;fmu1B;fmu1C;fmu1D]).^2);
 Dis = [Dis1,Dis2,Dis3,Dis4];
 Lout = [L,L0,L1,L1A,L1B,L1C,L1D];
 
