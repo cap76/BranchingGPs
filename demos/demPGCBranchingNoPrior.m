@@ -46,13 +46,12 @@ Data.X3 = [Time',z3'];
 %D1 = importdata('./Pa13-Combo2.txt');
 
 try %Try to resume analysis 
-    load(['/Users/christopher_penfold/Desktop/Branching_GPs/PGC/PGC_new_new/PGCResults_' num2str(batchi) '_noprior_modelcomp.mat'])
+    load(['/Users/christopher_penfold/Desktop/OldBranching_GPs/PGC/PGC_new_new/PGCResults_' num2str(batchi) '_noprior_modelcomp.mat'])
     startind = length(Ps)+1;
     endind   = (batchi)*100;
 catch
-    sfasffaf
-    startind = (batchi-1)*300 + 1;
-    endind   = (batchi)*300;
+    startind = (batchi-1)*100 + 1;
+    endind   = (batchi)*100;
 end
 
 endind = min(endind,size(Data.Y,2));
@@ -206,12 +205,12 @@ Ps{i,1} = Output;
 
 %keyboard
 if double(int64(i/1))==(i/1)
-    save(['/Users/christopher_penfold/Desktop/Branching_GPs/PGC/PGC_new_new/PGCResults_' num2str(batchi) '_noprior_modelcomp_r.mat'],'Ps')
+    save(['/Users/christopher_penfold/Desktop/OldBranching_GPs/PGC/PGC_new_new/PGCResults_' num2str(batchi) '_noprior_modelcomp_r.mat'],'Ps')
 end
 
 end
 
-save(['/Users/christopher_penfold/Desktop/Branching_GPs/PGC/PGC_new_new/PGCResults_' num2str(batchi) '_noprior_modelcomp_r.mat'],'Ps')
+save(['/Users/christopher_penfold/Desktop/OldBranching_GPs/PGC/PGC_new_new/PGCResults_' num2str(batchi) '_noprior_modelcomp_r.mat'],'Ps')
 
 
 Fin = 1;

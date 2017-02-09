@@ -1,5 +1,7 @@
 function [Fin] = demEarlyDevBranchingNoPrior(seed,batchi);
 
+
+warning off all
 %addpath(genpath('../Pseudotime_Algorithms/Functions/gpml-matlab-v3.6-2015-07-07/'))
 %addpath(('./gpml/cov'))
 %addpath(genpath('./netlab3_3/'))
@@ -76,7 +78,7 @@ Data.X3(find(Data.X3(:,2)==3),2)=1;
 %1,2,3 -> 1,1,1
 Data.X4 = Data.X;
 Data.X4(find(Data.X4(:,2)==2),2)=1;
-Data.X4(find(Data.X4(:,2)==2),3)=1;
+Data.X4(find(Data.X4(:,2)==3),2)=1;
 %for i = 1:size(Data.Y,2)
 %    Data.Y(:,i) = (Data.Y(:,i)-mean(Data.Y(:,i)))
 %end
@@ -85,8 +87,8 @@ Data.X4(find(Data.X4(:,2)==2),3)=1;
 %D1 = importdata('./Pa13-Combo2.txt');
 
 try %Try to resume analysis 
-    load(['/Users/christopher_penfold/Desktop/Branching_GPs/PGC/EarlyDev/Final_final_final/EarlDevResults_' num2str(batchi) '_' num2str(seed) '_noprior.mat'])
-    startind = length(Ps)+1;
+    load(['../results/earlydevelopment/EarlDevResults_' num2str(batchi) '_' num2str(seed) '_noprior_r.mat'])
+    startind = (batchi-1)*100 + 1;%startind = length(Ps)+1;
     endind   = (batchi)*100;
 catch
     startind = (batchi-1)*100 + 1;
@@ -113,10 +115,10 @@ Xstar1 = [repmat(linspace(0,30,1000),1,4);ones(1,1000),2*ones(1,1000),3*ones(1,1
 
 for i = startind:endind
 
-    try
-    [length(Ps),startind]
-    catch
-    end
+    %try
+    %[length(Ps),startind]
+    %catch
+    %end
     
 %Y1 = D1.data(i,:)'; %Mock hrp DC
 %Y2 = D1.data(i,[1:52,2*52+1:3*52,52+1:2*52])';
@@ -137,29 +139,29 @@ hyp.cov  = [11;1.5;11;1.5;11;2;2;2;2;2;2;2;2;2]; hyp.mean = mean(Data.Y(:,i)); h
 
 %Use : covBranchingProcess_3C
 
-hyp_pN1 = feval(@minimize, hyp, @gp, -20000, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X,Data.Y(:,i));         % optimise
-[L1 dL1] = feval(@gp,hyp_pN1, 'infExact', 'meanConst',@covBranchingProcess_3C,'likGauss',Data.X,Data.Y(:,i));         % optimise
-[ymu1 ys21 fmu1 fs21   ]= feval(@gp,hyp_pN1, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X,Data.Y(:,i),Xstar1);
+ hyp_pN1 = feval(@minimize, hyp, @gp, -20000, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X,Data.Y(:,i));         % optimise
+ [L1 dL1] = feval(@gp,hyp_pN1, 'infExact', 'meanConst',@covBranchingProcess_3C,'likGauss',Data.X,Data.Y(:,i));         % optimise
+ [ymu1 ys21 fmu1 fs21   ]= feval(@gp,hyp_pN1, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X,Data.Y(:,i),Xstar1);
+ 
+ 
+ hyp_pN2 = feval(@minimize, hyp, @gp, -20000, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X1,Data.Y(:,i));         % optimise
+ [L2 dL2] = feval(@gp,hyp_pN2, 'infExact', 'meanConst',@covBranchingProcess_3C,'likGauss',Data.X1,Data.Y(:,i));         % optimise
+ [ymu2 ys22 fmu2 fs22   ]= feval(@gp,hyp_pN2, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X1,Data.Y(:,i),Xstar1);
+ 
+ hyp_pN3 = feval(@minimize, hyp, @gp, -20000, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X2,Data.Y(:,i));         % optimise
+ [L3 dL3] = feval(@gp,hyp_pN3, 'infExact', 'meanConst',@covBranchingProcess_3C,'likGauss',Data.X2,Data.Y(:,i));         % optimise
+ [ymu3 ys23 fmu3 fs23   ]= feval(@gp,hyp_pN3, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X2,Data.Y(:,i),Xstar1);
+ 
+ 
+ hyp_pN4 = feval(@minimize, hyp, @gp, -20000, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X3,Data.Y(:,i));         % optimise
+ [L4 dL4] = feval(@gp,hyp_pN4, 'infExact', 'meanConst',@covBranchingProcess_3C,'likGauss',Data.X3,Data.Y(:,i));         % optimise
+ [ymu4 ys24 fmu4 fs24   ]= feval(@gp,hyp_pN4, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X3,Data.Y(:,i),Xstar1);
+ 
 
 
-hyp_pN2 = feval(@minimize, hyp, @gp, -20000, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X1,Data.Y(:,i));         % optimise
-[L2 dL2] = feval(@gp,hyp_pN2, 'infExact', 'meanConst',@covBranchingProcess_3C,'likGauss',Data.X1,Data.Y(:,i));         % optimise
-[ymu2 ys22 fmu2 fs22   ]= feval(@gp,hyp_pN2, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X1,Data.Y(:,i),Xstar1);
-
-hyp_pN3 = feval(@minimize, hyp, @gp, -20000, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X2,Data.Y(:,i));         % optimise
-[L3 dL3] = feval(@gp,hyp_pN3, 'infExact', 'meanConst',@covBranchingProcess_3C,'likGauss',Data.X2,Data.Y(:,i));         % optimise
-[ymu3 ys23 fmu3 fs23   ]= feval(@gp,hyp_pN3, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X2,Data.Y(:,i),Xstar1);
-
-
-hyp_pN4 = feval(@minimize, hyp, @gp, -20000, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X3,Data.Y(:,i));         % optimise
-[L4 dL4] = feval(@gp,hyp_pN4, 'infExact', 'meanConst',@covBranchingProcess_3C,'likGauss',Data.X3,Data.Y(:,i));         % optimise
-[ymu4 ys24 fmu4 fs24   ]= feval(@gp,hyp_pN4, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X3,Data.Y(:,i),Xstar1);
-
-
-
-hyp_pN5 = feval(@minimize, hyp, @gp, -20000, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X4,Data.Y(:,i));         % optimise
-[L5 dL5] = feval(@gp,hyp_pN5, 'infExact', 'meanConst',@covBranchingProcess_3C,'likGauss',Data.X4,Data.Y(:,i));         % optimise
-[ymu5 ys25 fmu5 fs25   ]= feval(@gp,hyp_pN5, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X4,Data.Y(:,i),Xstar1);
+ %hyp_pN5 = feval(@minimize, hyp, @gp, -20000, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X4,Data.Y(:,i));         % optimise
+ %[L5 dL5] = feval(@gp,hyp_pN5, 'infExact', 'meanConst',@covBranchingProcess_3C,'likGauss',Data.X4,Data.Y(:,i));         % optimise
+ %[ymu5 ys25 fmu5 fs25   ]= feval(@gp,hyp_pN5, 'infExact', 'meanConst', @covBranchingProcess_3C,'likGauss',Data.X4,Data.Y(:,i),Xstar1);
 
 
 %hyp_pN1 = feval(@minimize, hyp, @gp, -10000, 'infFITC', 'meanConst', covfuncF,'likGauss',Data.X,Data.Y(:,i));         % optimise
@@ -217,56 +219,59 @@ hyp_pN5 = feval(@minimize, hyp, @gp, -20000, 'infExact', 'meanConst', @covBranch
 %Output.AIC = AIC;
 %Output.BIC = BIC;
 
-Output.remove_inds = remove_inds;
-Output.ind_train = ind_train;
+%Output.remove_inds = remove_inds;
+%Output.ind_train = ind_train;
 
-Output.H  = hyp_pN1;
-Output.H2 = hyp_pN2;
-Output.H3 = hyp_pN3;
-Output.H4 = hyp_pN4;
-Output.H5 = hyp_pN5;
+Ps{i,1}.remove_inds3 = remove_inds;
+Ps{i,1}.ind_train3 = ind_train;
 
 
-Output.L  = L1;
-Output.L2 = L2;
-Output.L3 = L3;
-Output.L4 = L4;
-Output.L5 = L5;
+Ps{i,1}.H_2  = hyp_pN1;
+Ps{i,1}.H2_2 = hyp_pN2;
+Ps{i,1}.H3_2 = hyp_pN3;
+Ps{i,1}.H4_2 = hyp_pN4;
+%Ps{i,1}.H52 = hyp_pN5;
 
-Output.ymu1 = ymu1;
-Output.ymu2 = ymu2;
-Output.ymu3 = ymu3;
-Output.ymu4 = ymu4;
-Output.ymu5 = ymu5;
 
-Output.fmu1 = fmu1;
-Output.fmu2 = fmu2;
-Output.fmu3 = fmu3;
-Output.fmu4 = fmu4;
-Output.fmu5 = fmu5;
+Ps{i,1}.L_2  = L1;
+Ps{i,1}.L2_2 = L2;
+Ps{i,1}.L3_2 = L3;
+Ps{i,1}.L4_2 = L4;
+%Ps{i,1}.L52 = L5;
 
-Output.fs21 = fs21;
-Output.fs22 = fs22;
-Output.fs23 = fs23;
-Output.fs24 = fs24;
-Output.fs25 = fs25;
+Ps{i,1}.ymu1_2 = ymu1;
+Ps{i,1}.ymu2_2 = ymu2;
+Ps{i,1}.ymu3_2 = ymu3;
+Ps{i,1}.ymu4_2 = ymu4;
+%Ps{i,1}.ymu52 = ymu5;
 
-Output.ys21 = ys21;
-Output.ys22 = ys22;
-Output.ys23 = ys23;
-Output.ys24 = ys24;
-Output.ys25 = ys25;
+Ps{i,1}.fmu1_2 = fmu1;
+Ps{i,1}.fmu2_2 = fmu2;
+Ps{i,1}.fmu3_2 = fmu3;
+Ps{i,1}.fmu4_2 = fmu4;
+%Ps{i,1}.fmu52 = fmu5;
 
-Ps{i,1} = Output;
+Ps{i,1}.fs21_2 = fs21;
+Ps{i,1}.fs22_2 = fs22;
+Ps{i,1}.fs23_2 = fs23;
+Ps{i,1}.fs24_2 = fs24;
+%Ps{i,1}.fs252 = fs25;
 
+Ps{i,1}.ys21_2 = ys21;
+Ps{i,1}.ys22_2 = ys22;
+Ps{i,1}.ys23_2 = ys23;
+Ps{i,1}.ys24_2 = ys24;
+%Ps{i,1}.ys252 = ys25;
+
+%Ps{i,1} = Output;
 
 if double(int64(i/1))==(i/1)
-    save(['/Users/christopher_penfold/Desktop/Branching_GPs/PGC/EarlyDev/Final_final_final/EarlDevResults_' num2str(batchi) '_' num2str(seed) '_noprior.mat'],'Ps')
+    save(['../results/earlydevelopment/EarlDevResults_' num2str(batchi) '_' num2str(seed) '_noprior_r.mat'],'Ps')
 end
 
 end
 
-save(['/Users/christopher_penfold/Desktop/Branching_GPs/PGC/EarlyDev/Final_final_final/EarlDevResults_' num2str(batchi) '_' num2str(seed) '_noprior.mat'],'Ps')
+save(['../results/earlydevelopment/EarlDevResults_' num2str(batchi) '_' num2str(seed) '_noprior_r.mat'],'Ps')
 
 
 Fin = 1;

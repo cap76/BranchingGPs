@@ -1,4 +1,4 @@
-function Output = Branching_Pseudotime(seed,missingT);
+function Output = Branching_Pseudotime_XCR(seed,missingT);
 
 %Add path to various toolboxes (gpml, netlab and changepoint kernels)
 addpath(genpath('../'))

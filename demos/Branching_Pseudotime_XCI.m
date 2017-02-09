@@ -4,7 +4,7 @@ function Output = Branching_Pseudotime_XCI(seed,missingT);
 addpath(genpath('../'))
 
 try %Try loading in previous run
-    load(['Marker_Pseudotime_XCI_' num2str(seed) '_' num2str(missingT) '_cov2D.mat'])
+    sdsd load(['Marker_Pseudotime_XCI_' num2str(seed) '_' num2str(missingT) '_cov2Dv2.mat'])
     rng(Output.s) %Set random number generator to previous state   
     
     if isempty(Output.stepno)
@@ -35,7 +35,7 @@ catch %Initialise the pseudotime run
 
 %Reset random number generator
 rng(seed)
-NoMCMC = 10000; %No. steps in MCMC (initial run)
+NoMCMC = 20000; %No. steps in MCMC (initial run)
 
 %Grab some data ...
 [D1,t1,Type,Sex,uID,FixLabel,FixTime,Assign,nocells] = initialisedata(missingT);
@@ -43,7 +43,6 @@ NoMCMC = 10000; %No. steps in MCMC (initial run)
 [options, prior, altprior] = initialiseprior(D1);
 %Initialise the branches (assign unlabelled data on the fly)
 [Data,X,Y,Xstar] = initialiseBranch(D1.data(4:end,:),t1,Type,Sex,uID,FixLabel,FixTime,Assign,prior);
-
 %Tune branch times only (fix other hyperparameters from here on out).
 Data.update.im{3} = altprior;
 
@@ -240,7 +239,7 @@ for i = StartNo:NoMCMC %Begin MCMC
              Output.stepno = i;
              Output.s = rng;
              %Output.options = options;            
-             save(['Marker_Pseudotime_XCI_' num2str(seed) '_' num2str(missingT) '_cov2D.mat'],'Output')            
+             save(['Marker_Pseudotime_XCI_' num2str(seed) '_' num2str(missingT) '_cov2Dv2.mat'],'Output')            
 %            save('v4Marker_Pseudotime_percent_run=1_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5c_extraupdates_transformdropout.mat')
             %save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov5c.mat'],'Output')                
             %save(['v4Marker_Pseudotime_percent_run=' num2str(seed) '_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5a_extraupdates_transformdropout.mat'],'Output')
@@ -255,7 +254,7 @@ Output.Xstar = Xstar;
 Output.stepno = i;
 Output.s = rng;
 
-save(['Marker_Pseudotime_XCI_' num2str(seed) '_' num2str(missingT) '_cov2D.mat'],'Output')
+save(['Marker_Pseudotime_XCI_' num2str(seed) '_' num2str(missingT) '_cov2Dv2.mat'],'Output')
 %save('v4Marker_Pseudotime_percent_run=1_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5c_extraupdates_transformdropout.mat')
 %save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov5c.mat'],'Output') 
 %save(['v4Marker_Pseudotime_percent_run=' num2str(seed) '_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5c_extraupdates_transformdropout.mat'],'Output')
@@ -816,14 +815,17 @@ altprior.cov = {p3,p4,p3,p4,p1_alt,p1_alt,p1_alt,p1_alt,p1_alt,p1_alt};
 
 function [D1,t1,Type,Sex,uID,FixLabel,FixTime,Assign,nocells] = initialisedata(missingT);
 
-
 %Load the data (in this case PGC markers)
 %D1    = importdata('/Users/christopher_penfold/Desktop/Lab Meeting/NFKB_IL_WNT.xlsx');
 % D1    = importdata('./MarkerGenes_Naokos_Paper.xlsx');
 
-D_1 = importdata('~/Desktop/Maud_WT.csv',',',1);
+D_1 = importdata('GSE80810_RPRT_WT.csv',',',1);
+D_1.data = D_1.data(:,D_1.data(1,:)~=2 & D_1.data(2,:)~=2); %Only take correct crosses CB
 D_1.data(1,:) = ones;
-D_2 = importdata('~/Desktop/Maud_KO.csv',',',1);
+D_1.data(1,find(D_1.data(2,:)<2)) = randi([1 2],1,length(find(D_1.data(2,:)<2)));
+
+D_2 = importdata('GSE80810_RPRT_KO.csv',',',1);
+D_2.data = D_2.data(:,D_2.data(1,:)~=2 & D_2.data(2,:)~=2);
 D_2.data(1,:) = 2*ones;
 % Data is in the following format:
 % (No. genes + 3) x (No. cells) 
@@ -837,7 +839,7 @@ D1.data = [D_1.data,D_2.data];
 %ind_missing = find(D1.data(3,:)==-1); %Get indices for the ESCs/unlabelled. These will be assigned on the fly ...
 %ind_obs     = setdiff(1:1:size(D1.data,2),ind_missing); %Index for everything else
 
-t1   = D1.data(1,:);            %Vector of developmental stage (capture time)
+t1   = D1.data(2,:);            %Vector of developmental stage (capture time)
 D1.data(3:end,:) = log2(D1.data(3:end,:)+1); %log_2 transform expression data
 %y1   = D1.data(4:end,:);       %Expression levels. Duplicate (remove)
 Type = D1.data(1,:);            %Cell type
@@ -849,58 +851,15 @@ Sex = ones(1,length(t1));
 uT = unique(t1);
 uType = unique(Type);
 
-% for ii = 1:length(unique(t1))
-%     for jj = 1:length(unique(Type))
-%         for kk = 1:length(unique(Sex))
-%             ind = find(t1==uT(ii) & Sex==uSex(kk) & Type==uType(jj));            
-%             for ll = 1:size(D1.data(4:end,:),1)                
-%                 %Get rid of extreme dropout
-%                 y = D1.data(ll+3,ind);                
-%                 if length(find(y~=0))>3 %If there are non zeros                
-%                 y(find(y==0)) = median(y(find(y~=0)));
-%                 D1.data(ll+3,ind) = y; 
-%                 end
-%             end
-%             
-%         end
-%     end
-% end
-     
 ind_obs = 1:1:length(t1);%[];
 
 FixLabel = ones(1,length(t1)); %Fix labels for a subset of cells where FixLabel=1
-FixLabel(1,ind_obs) = ones;     %i.e., do not update the label in the Gibbs step
+%FixLabel(1,ind_obs) = ones;     %i.e., do not update the label in the Gibbs step
 FixTime = zeros(1,length(t1));  %Fix these time points (will be used for bulk data)
                                 %i.e. do not update the time point
 
 %Need to assign branch label (1 or 2). Do this randomly for the pre-implantation.
 Assign  = Type;
-Assign(find(Assign==0 | Assign==-1)) = randi([1 2],1,length(find(Assign==0 | Assign==-1))); %Random assignment of pre-implantation and ESCs
-
-%Okay, lets pretend we have bulk data (actually this is the average of the single cell data). Maybe a little naughty.
-%  Xin = [];
-%  for i = 1:14 %There are 14 capture times
-%      Dat = D1.data(4:end,:);    
-%      if i <= 6
-%              ind1 = find(t1==(i-1)); %Get all preimplantation at timepoint (i-1)
-%              X    = mean(Dat(:,ind1),2); %Expression level for all genes
-%              Xin  = [Xin,[randi([1 2]); 1; i; X]]; %Type, sex and capture time
-%      else
-%          ind1 = find(t1==(i-1) & Type==1); %PGC
-%          ind2 = find(t1==(i-1) & Type==2); %Soma
-%          X1 = mean(Dat(:,ind1),2);
-%          X2 = mean(Dat(:,ind2),2);            
-%          Xin = [Xin,[1;1;i;X1],[2;1;i;X2]];
-%      end
-%  end
-%   Xin = Xin(:,find(isnan(sum(Xin,1))==0));
-%Finished generating the bulk measurments
-
-%Type(:) = -1; %Okay now lets develop amnesia over these branch labels (blastocyst).
-%t1(:) = -1;
-%Type(find(t1==6 | t1 == missingT))   = -1;
-%FixLabel(find(t1==6 | t1 == missingT)) = 0;
-%t1(find(t1==6 | t1 == missingT))   = -1;
 
 t1       = [t1];
 Sex      = [Sex];
@@ -908,7 +867,9 @@ Type     = [Type];
 nocells  = max(uID);
 uID      = [uID]; %Unique labels for each cell
 %D1.data  = [D1.data];
-D1.data = D1.data(3:103,:);
+inds     = find(mean(2.^D1.data -1,2)>100);
+inds     = inds(randperm(length(inds)));
+D1.data = D1.data(inds(1:70),:);
 %y1       = [y1,Xin(4:end,:)];
 NoObs    = size(FixLabel,2);
 
@@ -917,20 +878,6 @@ FixLabel    = [FixLabel]; %Fix only the bulk data
 FixTime     = [FixTime];  
 Assign      = [Assign]; %????? Is this random? Do we use this variable?
 
-%Concatenate bulk data with single cell data
-%t1       = [t1,Xin(3,:)];
-%Sex      = [Sex,Xin(2,:)];
-%Type     = [Type,Xin(1,:)];
-%nocells  = max(uID);
-%uID      = [uID,nocells+1:size(t1,2)]; %Unique labels for each cell
-%D1.data  = [D1.data,Xin];
-%%y1       = [y1,Xin(4:end,:)];
-%NoObs    = size(FixLabel,2);
-
-%FixLabel(:) = zeros;
-%FixLabel    = [FixLabel,ones(1,size(Xin,2))]; %Fix only the bulk data
-%FixTime     = [FixTime,ones(1,size(Xin,2))];  
-%Assign      = [Assign,Xin(1,:)]; %????? Is this random? Do we use this variable?
 
 t1          = t1./max(t1); %Re-scale time beteween 0 and 1
 

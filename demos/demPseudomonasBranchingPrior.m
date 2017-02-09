@@ -21,6 +21,8 @@ D1 = importdata('./Pa13-Combo2.txt');
 %load('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasBranchingResults.mat')
 %endind = length(Pseudomonas);
 %endind = min(endind,size(D1.data,1));
+load ../results/pseudomonas/PseudomonasBranchingResults_complete.mat
+
 
 %Measurement times. Permute these for different branching structures. 
 tt = [0,2,3,4,6,7,8,10,11,12,14,16,17.5];
@@ -32,13 +34,12 @@ X3 = [repmat(tt,1,12); ones(1,52),2*ones(1,52),2*ones(1,52)]';
 Xstar1 = [repmat(linspace(0,17.5,50),1,3);ones(1,50),2*ones(1,50),3*ones(1,50)]';
 Xstar2 = [repmat(linspace(0,17.5,50),1,3);ones(1,50),1*ones(1,50),2*ones(1,50)]';
 Xstar3 = [repmat(linspace(0,17.5,50),1,3);ones(1,50),2*ones(1,50),2*ones(1,50)]';
-keyboard
+
 for i = 1:length(Pseudomonas)%startind:endind
 
      if isempty(Pseudomonas{i})
     
-         
-         keyboard
+         i
 pcp1     = {@priorGamma,2,2};    %Mean 4, std 8 
 pcp1p2   = {@priorGamma,4,2};    %Mean 8, std 16 
 pcp2     = {@priorGauss,1,0.5};  %Quick transitions        
@@ -185,8 +186,8 @@ Output.fs26 = fs26;
 Output.fs27 = fs27;
 Output.fs28 = fs28;
 
-Ps{i,1} = Output;
-save('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasBranchingResults_complete.mat','Pseudomonas')
+Pseudomonas{i,1} = Output;
+save('../results/pseudomonas/PseudomonasBranchingResults_complete2.mat','Pseudomonas')
 
 %Save every 10 steps.
 
@@ -196,7 +197,7 @@ save('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/Pseudo
 
 end
 
-save('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasBranchingResults_complete.mat','Pseudomonas')
+save('../results/pseudomonas/PseudomonasBranchingResults_complete2.mat','Pseudomonas')
 %save(['./results/pseudomonas/PseudomonasResults_Oct_5_' num2str(batchi) '.mat'],'Ps')
 
 Fin = 1;

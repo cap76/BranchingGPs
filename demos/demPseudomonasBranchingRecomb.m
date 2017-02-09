@@ -7,15 +7,15 @@ addpath(genpath('../'))
 
 D1 = importdata('./Pa13-Combo2.txt');
 
-%try %Try to resume analysis 
-%    load(['./results/pseudomonas/PseudomonasResultsRecomb_Oct_5_' num2str(batchi) '_prior1.mat'])
-%    startind = length(Ps)+1;
-%    endind   = (batchi)*1000;
-%catch
-%    startind = (batchi-1)*1000 + 1;
-%    endind   = (batchi)*1000;
-%end
-load('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasRecombinationResults.mat')
+try %Try to resume analysis 
+    load(['../results/pseudomonas/PseudomonasResultsRecomb_Oct_5_' num2str(batchi) '_prior1_v2.mat'])
+    startind = length(Ps)+1;
+    endind   = (batchi)*1000;
+catch
+    startind = (batchi-1)*1000 + 1;
+    endind   = (batchi)*1000;
+end
+%load('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasRecombinationResults.mat')
 %load('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasBranchingResults.mat')
 
 endind = length(PseudomonasRecomb);
@@ -25,9 +25,9 @@ X1 = [repmat(tt,1,8); ones(1,52),2*ones(1,52)]';
 
 Xstar1 = [repmat(linspace(0,17.5,50),1,2);ones(1,50),2*ones(1,50)]';
 
-for i = 1:length(PseudomonasRecomb)%startind:endind
+for i = startind:endind
 
-    if isempty(PseudomonasRecomb{i})
+    %if isempty(PseudomonasRecomb{i})
     
 pcp1     = {@priorGamma,2,2};    % Gaussian prior
 pcp1p2   = {@priorGamma,4,2};    %Mean 8, std 16
@@ -38,22 +38,23 @@ Y1 = Y2(1:2*52,:); %Take mock and DC only
 
 l1 = log(3); l2 = log(3); lg = log(3); v1 = log(3); v2 = log(3); vg = log(std(Y1));
 
-hyp.cov  = [14;.5;.5;4;.5;.5;l1;v1;l1;v1;l1;v1]; hyp.mean = mean(Y1(:,1)); hyp.lik  = 2;
+%[18;1;3.5;1;l1;v1;l1;v1];
+hyp.cov  = [18;1;3.5;1;l1;v1;l1;v1]; hyp.mean = mean(Y1(:,1)); hyp.lik  = 2;
 %Branching/recombination process
-prior.mean = {[]};  prior.cov  = {pcp1p2;[];[];pcp1;[];[];[];[];[];[];[];[]}; prior.lik = {[]};
+prior.mean = {[]};  prior.cov  = {pcp1p2;[];pcp1;[];[];[];[];[]}; prior.lik = {[]}; %prior.cov  = {pcp1p2;[];[];pcp1;[];[];[];[];[];[];[];[]}; prior.lik = {[]};
 im = {@infPrior,@infExact,prior};                % inference method
-par1a = {'meanConst','covBranchingRecombinationProcess_2A','likGauss',X1,Y1};
-par1b = {'meanConst','covBranchingRecombinationProcess_2A','likGauss',X1,Y1,Xstar1};
+par1a = {'meanConst','covBranchingRecombinationProcess_2C','likGauss',X1,Y1};
+par1b = {'meanConst','covBranchingRecombinationProcess_2C','likGauss',X1,Y1,Xstar1};
 hyp_pN1 = feval(@minimize, hyp, @gp, -40000, im, par1a{:});         % optimise
 [L1 dL1] = gp(hyp_pN1, im, par1a{:});         % optimise
 [ymu1 ys21 fmu1 fs21   ]= feval(@gp,hyp_pN1, im, par1b{:});
 
 %Branching process (recombines at 800, essentially at infinity)
-hyp.cov  = [800;1;1; 4;1;1;l1;v1;l1;v1;l1;v1]; hyp.mean = mean(Y1(:,1)); hyp.lik  = 2;
-prior.mean = {[]};  prior.cov  = {pcp2_2;pcp2_2;pcp2_2;pcp1;[];[];[];[];[];[];[];[]}; prior.lik = {[]};
+hyp.cov  = [800;1; 4;1;l1;v1;l1;v1]; hyp.mean = mean(Y1(:,1)); hyp.lik  = 2; %hyp.cov  = [800;1;1; 4;1;1;l1;v1;l1;v1;l1;v1]; hyp.mean = mean(Y1(:,1)); hyp.lik  = 2;
+prior.mean = {[]};  prior.cov  = {pcp2_2;pcp2_2;pcp1;[];[];[];[];[]}; prior.lik = {[]};%prior.mean = {[]};  prior.cov  = {pcp2_2;pcp2_2;pcp2_2;pcp1;[];[];[];[];[];[];[];[]}; prior.lik = {[]};
 im = {@infPrior,@infExact,prior};                % inference method
-par1a = {'meanConst','covBranchingRecombinationProcess_2A','likGauss',X1,Y1};
-par1b = {'meanConst','covBranchingRecombinationProcess_2A','likGauss',X1,Y1,Xstar1};
+par1a = {'meanConst','covBranchingRecombinationProcess_2C','likGauss',X1,Y1};
+par1b = {'meanConst','covBranchingRecombinationProcess_2C','likGauss',X1,Y1,Xstar1};
 hyp_pN3 = feval(@minimize, hyp, @gp, -40000, im, par1a{:});         % optimise
 [L3 dL1] = gp(hyp_pN3, im, par1a{:});         % optimise
 [ymu3 ys23 fmu3 fs23   ]= feval(@gp,hyp_pN3, im, par1b{:});
@@ -70,8 +71,8 @@ hyp_pN7      = feval(@minimize, hyp, @gp, -40000, im, par1a{:});
 
 %Get MLs
 L = -[L1,L3,L7];
-AIC = 2*[14,8,4] - 2*L;
-BIC = - 2*L + [14,8,4]*log(size(X1,1));
+AIC = 2*[10,8,4] - 2*L;
+BIC = - 2*L + [10,8,4]*log(size(X1,1));
 
 
 Output.L = L;
@@ -91,13 +92,13 @@ Pseudomonas{i,1} = Output;
 %Ps{i,1} = Output;
 
 %save(['./results/pseudomonas/PseudomonasResultsRecomb_Oct_5_' num2str(batchi) '.mat'],'Ps')
-save('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasRecombinationResults_complete.mat','PseudomonasRecomb')
-
-    end
+%save('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasRecombinationResults_complete.mat','PseudomonasRecomb')
+ save(['../results/pseudomonas/PseudomonasResultsRecomb_Oct_5_' num2str(batchi) '_prior1_v2.mat'],'PseudomonasRecomb')
 
 end
 
-save('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasRecombinationResults_complete.mat','PseudomonasRecomb')
+ save(['../results/pseudomonas/PseudomonasResultsRecomb_Oct_5_' num2str(batchi) '_prior1_v2.mat'],'PseudomonasRecomb')
+%save('/Users/christopher_penfold/Desktop/GitHub/demos/results/pseudomonas/PseudomonasRecombinationResults_complete.mat','PseudomonasRecomb')
 %save(['./results/pseudomonas/PseudomonasResultsRecomb_Oct_5_' num2str(batchi) '.mat'],'Ps')
 
 Fin = 1;
