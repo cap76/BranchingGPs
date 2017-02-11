@@ -60,7 +60,7 @@ hyp_pN7 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
 
 %Now do joint modelling of subsets
 %1,2->3, Mock,Hrp -> DC
-hyp.cov = [4;1;hyp_pN7.cov;hyp_pN7.cov];hyp.mean = mean(Y1(:,1));hyp.lik = 2;
+hyp.cov = [4;1;hyp_pN7.cov;hyp_pN7.cov];hyp.mean = mean(Y1(:,1));hyp.lik = hyp_pN7.lik;
 prior.mean = {[]};  prior.cov  = {pcp1;pcp2;[];[];[];[]}; prior.lik = {[]};
 im = {@infPrior,@infExact,prior};                % inference method
 par1a = {'meanConst','covBranchingProcess_2A','likGauss',X2,Y1};
@@ -71,8 +71,9 @@ hyp_pN3 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
 
 %keyboard
 %Now do joint modelling of subsets
-%1,2->3,   Mock,hrp -> DC
-hyp.cov = [4;1;hyp_pN7;hyp_pN7];hyp.mean = mean(Y1(:,1));hyp.lik = 2;
+%1,2->3,   Mock,DC -> hrpA
+%keyboard
+hyp.cov = [4;0;hyp_pN7.cov;hyp_pN7.cov];hyp.mean = mean(Y1(:,1));hyp.lik = hyp_pN7.lik;
 prior.mean = {[]};  prior.cov  = {pcp1;pcp2;[];[];[];[]}; prior.lik = {[]};
 im = {@infPrior,@infExact,prior};                % inference method
 par1a = {'meanConst','covBranchingProcess_2A','likGauss',X2,Y2};
@@ -82,7 +83,7 @@ hyp_pN6 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
 [ymu6 ys26 fmu6 fs26   ]= feval(@gp,hyp_pN6, im, par1b{:});
 
 % Mock-> DC,hrp
-hyp.cov = [4;1;hyp_pN7;hyp_pN7];hyp.mean = mean(Y1(:,1));hyp.lik = 2;
+hyp.cov = [4;0;hyp_pN7.cov;hyp_pN7.cov];hyp.mean = mean(Y1(:,1));hyp.lik = hyp_pN7.lik;
 par1a = {'meanConst','covBranchingProcess_2A','likGauss',X3,Y1};
 par1b = {'meanConst','covBranchingProcess_2A','likGauss',X3,Y1,Xstar3};
 hyp_pN8 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
@@ -90,7 +91,7 @@ hyp_pN8 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
 [ymu8 ys28 fmu8 fs28   ]= feval(@gp,hyp_pN8, im, par1b{:});
 
 %3 branch structure. Mock->hrp->DC %Rearranging the hyperparameters here ....
-hyp.cov  = [4;1;8;1;l1;v1;l1;v1;hyp_pN7]; hyp.mean = mean(Y1(:,1)); hyp.lik  = 2;
+hyp.cov  = [hyp_pN6.cov(1:2);hyp_pN3.cov(1:2);hyp_pN6.cov(3:4);hyp_pN3.cov(3:4);hyp_pN7.cov]; hyp.mean = mean(Y1(:,1)); hyp.lik  = hyp_pN7.lik;
 prior.mean = {[]};  prior.cov  = {pcp1;pcp2;pcp1p2;pcp2;[];[];[];[];[];[]}; prior.lik = {[]};
 im = {@infPrior,@infExact,prior};                % inference method
 par1a = {'meanConst','covBranchingProcess_3A','likGauss',X1,Y1};
@@ -100,6 +101,7 @@ hyp_pN1 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
 [ymu1 ys21 fmu1 fs21   ]= feval(@gp,hyp_pN1, im, par1b{:});
 
 %3-branch, with one main two indendetly emerged branches, Mock->hrp, Mock->DC
+hyp.cov  = [hyp_pN6.cov(1:2);hyp_pN3.cov(1:2);hyp_pN6.cov(3:4);hyp_pN3.cov(3:4);hyp_pN7.cov]; hyp.mean = mean(Y1(:,1)); hyp.lik  = hyp_pN7.lik;
 par1a = {'meanConst','covBranchingProcess_3B','likGauss',X1,Y1};
 par1b = {'meanConst','covBranchingProcess_3B','likGauss',X1,Y1,Xstar1};
 hyp_pN2 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
@@ -107,25 +109,25 @@ hyp_pN2 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
 [ymu2 ys22 fmu2 fs22   ]= feval(@gp,hyp_pN2, im, par1b{:});
 
 %Shift data around
-prior.mean = {[]};  prior.cov  = {pcp1;pcp2;pcp1p2;pcp2;[];[];[];[];[];[]}; prior.lik = {[]};
-im = {@infPrior,@infExact,prior};                % inference method
-par1a = {'meanConst','covBranchingProcess_3A','likGauss',X1,Y2};
-par1b = {'meanConst','covBranchingProcess_3A','likGauss',X1,Y2,Xstar1};
-hyp_pN4 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
-[L4 dL4] = feval(@gp,hyp_pN4, im, par1a{:});         % optimise
-[ymu4 ys24 fmu4 fs24   ]= feval(@gp,hyp_pN4, im, par1b{:});
+%prior.mean = {[]};  prior.cov  = {pcp1;pcp2;pcp1p2;pcp2;[];[];[];[];[];[]}; prior.lik = {[]};
+%im = {@infPrior,@infExact,prior};                % inference method
+%par1a = {'meanConst','covBranchingProcess_3A','likGauss',X1,Y2};
+%par1b = {'meanConst','covBranchingProcess_3A','likGauss',X1,Y2,Xstar1};
+%hyp_pN4 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
+%[L4 dL4] = feval(@gp,hyp_pN4, im, par1a{:});         % optimise
+%[ymu4 ys24 fmu4 fs24   ]= feval(@gp,hyp_pN4, im, par1b{:});
 
 %1->2,1->3,  Mock->DC, Mock->hrp (same as 2)
-par1a = {'meanConst','covBranchingProcess_3B','likGauss',X1,Y2};
-par1b = {'meanConst','covBranchingProcess_3B','likGauss',X1,Y2,Xstar1};
-hyp_pN5 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
-[L5 dL5] = feval(@gp,hyp_pN5, im, par1a{:});         % optimise
-[ymu5 ys25 fmu5 fs25   ]= feval(@gp,hyp_pN5, im, par1b{:});
+%par1a = {'meanConst','covBranchingProcess_3B','likGauss',X1,Y2};
+%par1b = {'meanConst','covBranchingProcess_3B','likGauss',X1,Y2,Xstar1};
+%hyp_pN5 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
+%[L5 dL5] = feval(@gp,hyp_pN5, im, par1a{:});         % optimise
+%[ymu5 ys25 fmu5 fs25   ]= feval(@gp,hyp_pN5, im, par1b{:});
 
 %Store likelihoods
-L = -[L1,L2,L3,L4,L5,L6,L7,L8];
-AIC = 2*[12,12,8,12,12,8,4,8] - 2*L;
-BIC = - 2*L + [12,12,8,12,12,8,4,8]*log(size(X1,1));
+L = -[L1,L2,L3,L6,L7,L8];
+AIC = 2*[12,12,8,8,4,8] - 2*L;
+BIC = - 2*L + [12,12,8,8,4,8]*log(size(X1,1));
 
 Output.L = L;
 Output.AIC = AIC;
@@ -133,24 +135,24 @@ Output.BIC = BIC;
 Output.H1 = hyp_pN1;
 Output.H2 = hyp_pN2;
 Output.H3 = hyp_pN3;
-Output.H4 = hyp_pN4;
-Output.H5 = hyp_pN5;
+%Output.H4 = hyp_pN4;
+%Output.H5 = hyp_pN5;
 Output.H6 = hyp_pN6;
 Output.H7 = hyp_pN7;
 Output.H8 = hyp_pN8;
 Output.fmu1 = fmu1;
 Output.fmu2 = fmu2;
 Output.fmu3 = fmu3;
-Output.fmu4 = fmu4;
-Output.fmu5 = fmu5;
+%Output.fmu4 = fmu4;
+%Output.fmu5 = fmu5;
 Output.fmu6 = fmu6;
 Output.fmu7 = fmu7;
 Output.fmu8 = fmu8;
 Output.fs21 = fs21;
 Output.fs22 = fs22;
 Output.fs23 = fs23;
-Output.fs24 = fs24;
-Output.fs25 = fs25;
+%Output.fs24 = fs24;
+%Output.fs25 = fs25;
 Output.fs26 = fs26;
 Output.fs27 = fs27;
 Output.fs28 = fs28;
