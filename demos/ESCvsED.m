@@ -1,4 +1,4 @@
-function Output = ESCvsED(branchi);
+function Output = ESCvsED(batchi);
 
 warning off all
 
@@ -51,7 +51,8 @@ ind7 = [ind7a;ind7b;ind2(s1(double(int64(length(s1)/2))+1:end))];
 
 Xstar = [linspace(0,0.8,100)',ones(100,1); linspace(0,0.8,100)',2*ones(100,1)];
 
-D2 = importdata('AllProcesses.csv')
+%D2 = importdata('AllProcesses.csv')
+D2 = D1;
 %D2 = importdata('GSE36552_and_GSE63818_all.csv');
  
 genes = D2.textdata(4:end,1);
@@ -60,18 +61,14 @@ startind = (batchi-1)*1000+1;
 endind = (batchi)*1000;
 endind = min(endind,size(D2.data,1)-3);
 
+genes = D2.textdata(6:end,1);
+
 for i = 1:size(D2.data,1)-3
 
     try
         
     x1 = Output.Param.Store{end}.update.x(ind6,1);
     x2 = Output.Param.Store{end}.update.x(ind7,1);
-    
-    x3 = Output.Param.Store{end}.update.x(ind2,1); x1 = Output.Param.Store{end}.update.x(ind6,1);
-    x2 = Output.Param.Store{end}.update.x(ind7,1);
-    
-    y1 = log2(D2.data(i+3,ind6)'+1);
-    y2 = log2(D2.data(i+3,ind7)'+1);
     y1 = log2(D2.data(i+3,ind6)'+1);
     y2 = log2(D2.data(i+3,ind7)'+1);
     
@@ -79,9 +76,11 @@ for i = 1:size(D2.data,1)-3
     Y = [y1;y2];
            
     %Joint GP (not DE). 
-    %k1={'covMaterniso',3}; 
+    pLS     = {@priorGauss,0.5,1};
+    pN      = {@priorClamped}; 
+    
     hyp.cov = [log(3);log(3)]; hyp.mean = mean(Y(:,1)); hyp.lik = log(2);
-    prior.mean = {[]};  prior.cov  = {[];[]}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  = {pLS;[]}; prior.lik = {[]};
     im = {@infPrior,@infExact,prior}; 
     par1a = {'meanConst',@covSEiso,'likGauss',X(:,1),Y};
     par1b = {'meanConst',@covSEiso,'likGauss',X(:,1),Y,Xstar(:,1)};
@@ -94,7 +93,7 @@ for i = 1:size(D2.data,1)-3
     
     hyp.cov = [0.4; 3; hyp_pN2.cov;hyp_pN2.cov];    
     hyp.mean = hyp_pN2.mean; hyp.lik = hyp_pN2.lik;
-    prior.mean = {[]};  prior.cov  = {pcp1;pcp2;[];[];[];[]}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  = {pcp1;pcp2;pLS;[];pLS;[]}; prior.lik = {pN};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_2A','likGauss',X,Y};
     par1b = {'meanConst','covBranchingProcess_2A','likGauss',X,Y,Xstar};
@@ -102,21 +101,22 @@ for i = 1:size(D2.data,1)-3
     [L3 dL3] = feval(@gp,hyp_pN3, im, par1a{:});         % optimise
     [ymu3 ys23 fmu3 fs23   ]= feval(@gp,hyp_pN3, im, par1b{:});
     
-    
-    hyp.cov  = [0.7;3;hyp_pN3.cov(1:2);hyp_pN3.cov(3:end)]; hyp.mean = mean(Y(:,1)); hyp.lik  = hyp_pN3.lik;
-    prior.mean = {[]};  prior.cov  = {pcp1;pcp2;pcp1;pcp2;[];[];[];[]}; prior.lik = {[]}; %prior.cov  = {pcp1p2;[];[];pcp1;[];[];[];[];[];[];[];[]}; prior.lik = {[]};
+    hyp.cov  = [hyp_pN3.cov(1)+0.2;hyp_pN3.cov(2);hyp_pN3.cov(1:2);hyp_pN3.cov(3:end)]; hyp.mean = mean(Y(:,1)); hyp.lik  = log(2);
+    prior.mean = {[]};  prior.cov  = {pcp1;pcp2;pcp1;pcp2;pLS;[];pLS;[]}; prior.lik = {pN}; %prior.cov  = {pcp1p2;[];[];pcp1;[];[];[];[];[];[];[];[]}; prior.lik = {[]};
     im = {@infPrior,@infExact,prior};                % inference method
     par1a = {'meanConst','covBranchingRecombinationProcess_2C','likGauss',X,Y};
     par1b = {'meanConst','covBranchingRecombinationProcess_2C','likGauss',X,Y,Xstar};
     hyp_pN1 = feval(@minimize, hyp, @gp, -40000, im, par1a{:});         % optimise
     [L1 dL1] = gp(hyp_pN1, im, par1a{:});         % optimise
     [ymu1 ys21 fmu1 fs21   ]= feval(@gp,hyp_pN1, im, par1b{:});
-   
+       
     %Store likelihoods
     L   = -[L1,L2,L3];
     AIC = 2*[8,4,6] - 2*L;
     BIC = - 2*L + [8,4,6]*log(size(X,1));
 
+    ESCvED{i}.gene = genes{i};
+    
     ESCvED{i}.L = L;
     ESCvED{i}.AIC = AIC;
     ESCvED{i}.BIC = BIC;
@@ -140,7 +140,8 @@ for i = 1:size(D2.data,1)-3
     ESCvED{i}.hyp2 = hyp_pN2;    
     ESCvED{i}.hyp3 = hyp_pN3;    
     
-    save(['ESCvED_1_2E_' num2str(batchi) '_processes.mat'],'ESCvED')    
+
+    save(['ESCvED_1_2E_' num2str(batchi) '_NaokoMarkers.mat'],'ESCvED')    
     disp(['Step ' num2str(i)])
     catch
     end
