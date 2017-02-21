@@ -747,7 +747,7 @@ for cells = 1:length(FixLabel);%find(FixLabel==0) %These have no times or labels
         if  origt(cells)==min(origt)%Unlabelled time point
             Prt(1,:) = feval(p1{:},[gridt,gridt]);
         else
-            pri = {@priorGauss,origt(cells,1),.01};
+            pri = {@priorGauss,origt(cells),.01};
             Prt(1,:) = feval(pri{:},[gridt,gridt]);
         end  
         Lik = [Lik;Prt];
@@ -804,15 +804,19 @@ for cells = 1:length(FixLabel);%find(FixLabel==0) %These have no times or labels
     end
     end
     
+    try
 
         Prt = zeros(1,length(gridt));
         if  origt(cells)==min(origt)%Unlabelled time point
             Prt(1,:) = feval(p1{:},[gridt]);
         else
-            pri = {@priorGauss,origt(cells,1),.01};
+            pri = {@priorGauss,origt(cells),.01};
             Prt(1,:) = feval(pri{:},[gridt]);
         end  
         Lik = [Lik.^0.1;Prt]; %Initialise over power posterior
+    catch
+        keyboard
+    end
         
     %Now assign time and label to the cell of interest    
     Tim = [gridt]; %[unique(t1(find(t1>=0))),unique(t1(find(t1>=0)))];
