@@ -239,7 +239,7 @@ for i = StartNo:NoMCMC %Begin MCMC
              Output.stepno = i;
              Output.s = rng;
              %Output.options = options;            
-             save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2D.mat'],'Output')            
+             save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2D_pr.mat'],'Output')            
 %            save('v4Marker_Pseudotime_percent_run=1_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5c_extraupdates_transformdropout.mat')
             %save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov5c.mat'],'Output')                
             %save(['v4Marker_Pseudotime_percent_run=' num2str(seed) '_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5a_extraupdates_transformdropout.mat'],'Output')
@@ -254,7 +254,7 @@ Output.Xstar = Xstar;
 Output.stepno = i;
 Output.s = rng;
 
-save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2D.mat'],'Output')
+save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2D_pr.mat'],'Output')
 %save('v4Marker_Pseudotime_percent_run=1_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5c_extraupdates_transformdropout.mat')
 %save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov5c.mat'],'Output') 
 %save(['v4Marker_Pseudotime_percent_run=' num2str(seed) '_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5c_extraupdates_transformdropout.mat'],'Output')
@@ -673,6 +673,9 @@ gridt = linspace(0,1,50);
 gridLab = [ones(1,50),2*ones(1,50)];
 gridX = [gridt,gridt; ones(1,50),2*ones(1,50)]';
 
+p1 = {@priorSmoothBox2,0,1,30};
+
+
 Data.orig.hyp = cell(1,1);
 for arc = 1:size(y1,1)
 
@@ -722,6 +725,14 @@ for cells = 1:length(FixLabel);% find(FixLabel==0) %These have no times or label
     end
     end
     
+        Prt = zeros(1,2*length(gridt));
+        if  origt(cells)==min(origt)%Unlabelled time point
+            Prt(1,:) = feval(p1{:},[gridt,gridt]);
+        else
+            pri = {@priorGauss,origt(cells,1),.01};
+            Prt(1,:) = feval(pri{:},[gridt,gridt]);
+        end  
+        Lik = [Lik.^0.1;Prt]; %Initialise over power posterior
 
     %Now assign time and label to the cell of interest    
     Tim = [gridt,gridt]; %[unique(t1(find(t1>=0))),unique(t1(find(t1>=0)))];
@@ -764,6 +775,15 @@ for cells = 1:length(FixLabel);% find(FixLabel==0) %These have no times or label
     end
     end
     
+        Prt = zeros(1,length(gridt));
+        if  origt(cells)==min(origt)%Unlabelled time point
+            Prt(1,:) = feval(p1{:},[gridt]);
+        else
+            pri = {@priorGauss,origt(cells,1),.01};
+            Prt(1,:) = feval(pri{:},[gridt]);
+        end  
+        Lik = [Lik.^0.1;Prt]; %Initialise over power posterior
+    
     %Now assign time and label to the cell of interest    
     Tim = [gridt]; %[unique(t1(find(t1>=0))),unique(t1(find(t1>=0)))];
     %gridLab = %[ones(1,length(unique(t1(find(t1>=0))))),2*ones(1,length(unique(t1(find(t1>=0)))))];
@@ -800,7 +820,7 @@ Data.orig.tgrid = unique(t1);
 %Information about priors
 Data.orig.cov = 'covBranchingProcess_2D';
 Data.orig.im = {@infPrior,@infExact,prior};
-Data.orig.p1 = {@priorSmoothBox2,0,1,30};
+Data.orig.p1 = p1;%{@priorSmoothBox2,0,1,30};
 Data.orig.burnin = 1000; %Burnin
 Data.orig.TR = 0.01;  %Standard deviation of steps in time perturbation
 Data.orig.TR2 = 0.1;  %Standard deviation of steps in time perturbation

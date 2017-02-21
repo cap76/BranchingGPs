@@ -69,7 +69,7 @@ for arc = 1:size(Data.update.y,2)              %Inference method
     par = {'meanConst','covBranchingProcess_2E','likGauss',Data.update.x(ind,:),Data.update.y(ind,arc)};
     [L(1,arc) dL] = gp(Data.update.hyp{arc}, Data.update.im, par{:});
 end
-
+%keyboard
 %Log prior probability over timepoints
 for arc= 1:length(Data.update.origt)    
     if  Data.update.origt(arc)==min(Data.update.origt) %Uniform prior for ESC/anything with no capture time
@@ -209,7 +209,7 @@ for i = StartNo:NoMCMC
          
          %Next test the optimisation of branch times/rates only. All other
          %hyperparms fixed.
-         if double(int64(i/100))==(i/100) & i>200%i>Data.update.burnin
+         if double(int64(i/100))==(i/100) & i>Data.update.burnin
              
          count = count+1;
          for arc = 1:size(Data.update.y,2)
@@ -245,7 +245,7 @@ for i = StartNo:NoMCMC
              Output.stepno = i;
              Output.s = rng;
             
-            save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_2E.mat'],'Output')            
+            save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2E_pr.mat'],'Output')            
             %save(['v4Marker_Pseudotime_percent_run=' num2str(seed) '_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5a_extraupdates_transformdropout.mat'],'Output')
          end
          
@@ -263,7 +263,7 @@ Output.Xstar = Xstar;
 Output.stepno = i;
 Output.s = rng;
 
-save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_2E.mat'],'Output')            
+save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2E_pr.mat'],'Output')            
 %save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov5a.mat'],'Output')            
 %save(['v4Marker_Pseudotime_percent_run=' num2str(seed) '_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5c_extraupdates_transformdropout.mat'],'Output')
 
@@ -691,6 +691,8 @@ gridt = linspace(0,1,50);
 gridLab = [ones(1,50),2*ones(1,50)];
 gridX = [gridt,gridt; ones(1,50),2*ones(1,50)]';
 
+p1 = {@priorSmoothBox2,0,1,30};
+
 Data.orig.hyp = cell(1,1);
 for arc = 1:size(y1,1)
 
@@ -713,7 +715,7 @@ end
 
 %Now we are going to assign the missing data. Initially this is over a grid
 %of timepoints.
-for cells = 1:length(FixLabel);%find(FixLabel==0) %These have no times or labels ...
+for cells = 1:length(FixLabel);%find(FixLabel==0) %These have no times or labels ...  
     
     if FixLabel(cells)==0
     
@@ -737,11 +739,19 @@ for cells = 1:length(FixLabel);%find(FixLabel==0) %These have no times or labels
         par = {'meanConst','covBranchingProcess_2E','likGauss', Xtrain, Ytrain, gridX, Ytest};    
         [ymu ys2 fmu fs2 lp] = gp(Data.orig.hyp{arc}, im, par{:});     
 
-        Lik = [Lik;lp'];    
+        Lik = [Lik.^0.1;lp'];    
     end
     end
     
-
+        Prt = zeros(1,2*length(gridt));
+        if  origt(cells)==min(origt)%Unlabelled time point
+            Prt(1,:) = feval(p1{:},[gridt,gridt]);
+        else
+            pri = {@priorGauss,origt(cells,1),.01};
+            Prt(1,:) = feval(pri{:},[gridt,gridt]);
+        end  
+        Lik = [Lik;Prt];
+        
     %Now assign time and label to the cell of interest    
     Tim = [gridt,gridt]; %[unique(t1(find(t1>=0))),unique(t1(find(t1>=0)))];
     %gridLab = %[ones(1,length(unique(t1(find(t1>=0))))),2*ones(1,length(unique(t1(find(t1>=0)))))];
@@ -780,9 +790,30 @@ for cells = 1:length(FixLabel);%find(FixLabel==0) %These have no times or labels
         [ymu ys2 fmu fs2 lp] = gp(Data.orig.hyp{arc}, im, par{:});     
 
         Lik = [Lik;lp'];    
+        
+        %for i= 1:length(Data.update.origt)
+        %if  Data.update.origt(arc)==min(Data.update.origt)%Unlabelled time point
+        %    Prt(1,i) = feval(Data.update.p1{:},X(i,1));
+        %else
+        %    pri = {@priorGauss,Data.update.origt(i,1),.01};
+        %    Prt(1,i) = feval(pri{:},X(i,1));
+        %end    
+        %end   
+        
+        
     end
     end
     
+
+        Prt = zeros(1,length(gridt));
+        if  origt(cells)==min(origt)%Unlabelled time point
+            Prt(1,:) = feval(p1{:},[gridt]);
+        else
+            pri = {@priorGauss,origt(cells,1),.01};
+            Prt(1,:) = feval(pri{:},[gridt]);
+        end  
+        Lik = [Lik.^0.1;Prt]; %Initialise over power posterior
+        
     %Now assign time and label to the cell of interest    
     Tim = [gridt]; %[unique(t1(find(t1>=0))),unique(t1(find(t1>=0)))];
     %gridLab = %[ones(1,length(unique(t1(find(t1>=0))))),2*ones(1,length(unique(t1(find(t1>=0)))))];
@@ -790,10 +821,11 @@ for cells = 1:length(FixLabel);%find(FixLabel==0) %These have no times or labels
     ind = gendist(P,1,1);
     %ML or sample from distribution?    
     t1(cells) = Tim(ind);
-    %Assign(cells) = gridLab(ind);            
-        
-     
+    %Assign(cells) = gridLab(ind);                         
     end
+    
+    
+    
     
 end
 
@@ -817,7 +849,7 @@ Data.orig.tgrid = unique(t1);
 %Information about priors
 Data.orig.cov = 'covBranchingProcess_2E';
 Data.orig.im = {@infPrior,@infExact,prior};
-Data.orig.p1 = {@priorSmoothBox2,0,1,30};
+Data.orig.p1 = p1;%{@priorSmoothBox2,0,1,30};
 Data.orig.burnin = 1000; %Burnin
 Data.orig.TR = 0.01;  %Standard deviation of steps in time perturbation
 Data.orig.TR2 = 0.1;  %Standard deviation of steps in time perturbation
