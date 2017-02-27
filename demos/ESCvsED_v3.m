@@ -117,6 +117,11 @@ genes = D2.textdata(6:end,1);
 
 for i = startind:endind-3
         
+    cT1 = {@priorGamma,9,.05};   %0.4, .35
+    cT2 = {@priorGamma,11,.05};  %0.55, .5
+    cT3 = {@priorGamma,16,.05};  %0.8, 0.75         
+    pT  = {@priorGauss,3,1}; 
+    
     x1 = Output.Param.Store{end}.update.x(ind8,1);
     x2 = Output.Param.Store{end}.update.x(ind9,1);    
     x3 = Output.Param.Store{end}.update.x(ind10,1); 
@@ -160,7 +165,7 @@ for i = startind:endind-3
     k1={@covChangePointMultiD, {1, @covZero, {'covMaterniso',3}}};
      hyp.cov = [0.4;4;log(3);log(3)]; hyp.mean = []; hyp.lik = hyp_pN1.lik;
     %prior.mean = {[]};  
-    prior.cov  = {[];[];pLS;[]}; prior.lik = {pLS};
+    prior.cov  = {cT2;pT;pLS;[]}; prior.lik = {pLS};
     im = {@infPrior,@infExact,prior}; 
     par1a = {'meanZero',k1,'likGauss',X(find(X(:,2)==1),1),Y(find(X(:,2)==1))-ymu1c};
     par1b = {'meanZero',k1,'likGauss',X(find(X(:,2)==1),1),Y(find(X(:,2)==1))-ymu1c,Xstar(:,1)};
@@ -171,7 +176,7 @@ for i = startind:endind-3
     %Now initialise hyperparameters FPGC.
     hyp.cov = [0.4;4;log(3);log(3)]; hyp.mean = []; hyp.lik =  hyp_pN1.lik;
     %prior.mean = {[]};  
-    prior.cov  = {[];[];pLS;[]}; prior.lik = { pLS};
+    prior.cov  = {cT3;pT;pLS;[]}; prior.lik = { pLS};
     
     im = {@infPrior,@infExact,prior}; 
     par1a = {'meanZero',k1,'likGauss',X(find(X(:,2)==2),1),Y(find(X(:,2)==2))-ymu1d};
@@ -184,7 +189,7 @@ for i = startind:endind-3
     %Now initialise hyperparameters soma.
     hyp.cov = [0.4;4;log(3);log(3)]; hyp.mean = []; hyp.lik = hyp_pN1.lik;
     %prior.mean = {[]};  
-    prior.cov  = {[];[];pLS;[]}; prior.lik = { pLS};
+    prior.cov  = {cT1;pT;pLS;[]}; prior.lik = { pLS};
     
     im = {@infPrior,@infExact,prior}; 
     par1a = {'meanZero',k1,'likGauss',X(find(X(:,2)==3),1),Y(find(X(:,2)==3))-ymu1e};
@@ -196,10 +201,7 @@ for i = startind:endind-3
     %Now that we've initialised everything, let's start with more complex branching patterns.
     pLS = {@priorClamped};       %Mean
     
-    cT1 = {@priorGamma,9,.05};   %0.4, .35
-    cT2 = {@priorGamma,11,.05};  %0.55, .5
-    cT3 = {@priorGamma,16,.05};  %0.8, 0.75         
-    pT  = {@priorGauss,3,1}; 
+
         
         clear prior hyp
     %All different.    
@@ -283,11 +285,25 @@ for i = startind:endind-3
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X5,Y,Xstar};
     hyp_pN10 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
     [L10 dL10] = feval(@gp,hyp_pN10, im, par1a{:});         % optimise
-    [ymu10 ys210 fmu10 fs210   ]= feval(@gp,hyp_pN10, im, par1b{:});            
+    [ymu10 ys210 fmu10 fs210   ]= feval(@gp,hyp_pN10, im, par1b{:});     
+    
+    
+ %PGC and ESC are different
+    X6 = [x1,0*ones(size(x1,1),1); x2,0*ones(size(x2,1),1); x3,0*ones(size(x3,1),1); x4,0*ones(size(x4,1),1)]; %Only soma different         
+
+    hyp.cov = [4;hyp_pN2.cov(2);2;hyp_pN2.cov(2); 2; hyp_pN3.cov(2); 2; hyp_pN4.cov(2);  hyp_pN2.cov(3:4); hyp_pN3.cov(3:4); hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
+    hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
+    prior.mean = {[]};  prior.cov  =  {pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS}; prior.lik = {pLS};
+    im = {@infPrior,@infExact,prior};     
+    par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X6,Y};
+    par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X6,Y,Xstar};
+    hyp_pN11 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
+    [L11 dL11] = feval(@gp,hyp_pN11, im, par1a{:});         % optimise
+    [ymu11 ys211 fmu11 fs211   ]= feval(@gp,hyp_pN11, im, par1b{:});         
     
 
     %Store likelihoods
-    L   = -[L1,L2,L3,L4,L5,L6,L7,L8,L9,L10];
+    L   = -[L1,L2,L3,L4,L5,L6,L7,L8,L9,L10,L11];
     %AIC = 2*[8,4,6] - 2*L;
     %BIC = - 2*L + [8,4,6]*log(size(X,1));
 
@@ -344,19 +360,24 @@ for i = startind:endind-3
     ESCvED{i}.fmu10 = fmu10;
     ESCvED{i}.fs210 = fs210;    
     ESCvED{i}.ymu10 = ymu10;
-    ESCvED{i}.ys210 = ys210;      
+    ESCvED{i}.ys210 = ys210;  
+    
+    ESCvED{i}.fmu10 = fmu11;
+    ESCvED{i}.fs210 = fs211;    
+    ESCvED{i}.ymu10 = ymu11;
+    ESCvED{i}.ys210 = ys211;      
     
     ESCvED{i}.hyp1 = hyp_pN1;
     ESCvED{i}.hyp2 = hyp_pN2;    
     ESCvED{i}.hyp3 = hyp_pN3;    
     ESCvED{i}.hyp4 = hyp_pN4;    
-        ESCvED{i}.hyp5 = hyp_pN5;    
-            ESCvED{i}.hyp6 = hyp_pN6;    
-                ESCvED{i}.hyp7 = hyp_pN7;    
-                    ESCvED{i}.hyp8 = hyp_pN8;    
-                        ESCvED{i}.hyp9 = hyp_pN9;    
-                        ESCvED{i}.hyp10 = hyp_pN10;    
-           
+    ESCvED{i}.hyp5 = hyp_pN5;    
+    ESCvED{i}.hyp6 = hyp_pN6;    
+    ESCvED{i}.hyp7 = hyp_pN7;    
+    ESCvED{i}.hyp8 = hyp_pN8;    
+    ESCvED{i}.hyp9 = hyp_pN9;    
+    ESCvED{i}.hyp10 = hyp_pN10;    
+    ESCvED{i}.hyp11 = hyp_pN11;               
 
     save(['ESCvED_1_2E_' num2str(batchi) '_AllBranching_Matern_NaokoMarkers.mat'],'ESCvED')    
     disp(['Step ' num2str(i)])
