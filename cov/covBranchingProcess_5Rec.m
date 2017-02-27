@@ -32,7 +32,7 @@ if nargin<4                                                        % covariances
     
      if dg    
          
-        K    = covSEiso([hyp(15),hyp(16)],x(:,1)); %Base branch
+        K    = feval(k1{:},[hyp(15),hyp(16)],x(:,1)); %Base branch
         
         if isempty(ind1)==0 
         K1   = feval(covN2{:}, [location1,steepness1,location2,steepness2,hyp(9),hyp(10)], x(ind1,1));
@@ -183,7 +183,7 @@ end
         if xeqz==0 & dg==0
         K = zeros(size(x,1),size(z,1)); 
         %If indexes exist
-        if isempty(ind3)==0 & isempty(ind6)==0,K(ind3,ind6)   = feval(covN1{:}, [location3,steepness3,hyp(13),hyp(14)], x(ind3,1),z(ind6,1),1);end
+        if isempty(ind3)==0 & isempty(ind6)==0,K(ind3,ind6)   = feval(covN1{:}, [location4,steepness4,hyp(13),hyp(14)], x(ind3,1),z(ind6,1),1);end
         else
         K = zeros(size(x,1),size(x,1));
         if isempty(ind3)==0,K(ind3,ind3)   = feval(covN1{:}, [location4,steepness4,hyp(13),hyp(14)], x(ind3,1),x(ind3,1),1);end      
@@ -196,7 +196,7 @@ end
         if xeqz==0 & dg==0
         K = zeros(size(x,1),size(z,1)); 
         %If indexes exist
-        if isempty(ind3)==0 & isempty(ind4)==0,K(ind3,ind6)   = feval(covN1{:}, [location4,steepness4,hyp(13),hyp(14)], x(ind3,1),z(ind6,1),2);end
+        if isempty(ind3)==0 & isempty(ind6)==0,K(ind3,ind6)   = feval(covN1{:}, [location4,steepness4,hyp(13),hyp(14)], x(ind3,1),z(ind6,1),2);end
         else
         K = zeros(size(x,1),size(x,1));
         if isempty(ind3)==0,K(ind3,ind3)   = feval(covN1{:}, [location4,steepness4,hyp(13),hyp(14)], x(ind3,1),x(ind3,1),2);end      
@@ -256,7 +256,7 @@ elseif i==12
         if xeqz==0 & dg==0
         K = zeros(size(x,1),size(z,1)); 
         %If indexes exist
-        if isempty(ind3)==0 & isempty(ind6)==0,K(ind3,ind6)   = feval(covN1{:}, [location3,steepness3,hyp(13),hyp(14)], x(ind3,1),z(ind6,1),3);end
+        if isempty(ind3)==0 & isempty(ind6)==0,K(ind3,ind6)   = feval(covN1{:}, [location4,steepness4,hyp(13),hyp(14)], x(ind3,1),z(ind6,1),3);end
         else
         K = zeros(size(x,1),size(x,1));
         if isempty(ind3)==0,K(ind3,ind3)   = feval(covN1{:}, [location4,steepness4,hyp(13),hyp(14)], x(ind3,1),x(ind3,1),3);end      
@@ -269,7 +269,7 @@ elseif i==12
         if xeqz==0 & dg==0
         K = zeros(size(x,1),size(z,1)); 
         %If indexes exist
-        if isempty(ind3)==0 & isempty(ind6)==0,K(ind3,ind6)   = feval(covN1{:}, [location3,steepness3,hyp(13),hyp(14)], x(ind3,1),z(ind6,1),4);end
+        if isempty(ind3)==0 & isempty(ind6)==0,K(ind3,ind6)   = feval(covN1{:}, [location4,steepness4,hyp(13),hyp(14)], x(ind3,1),z(ind6,1),4);end
         else
         K = zeros(size(x,1),size(x,1));
         if isempty(ind3)==0,K(ind3,ind3)   = feval(covN1{:}, [location4,steepness4,hyp(13),hyp(14)], x(ind3,1),x(ind3,1),4);end      

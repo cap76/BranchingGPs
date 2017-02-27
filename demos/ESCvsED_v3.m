@@ -101,7 +101,7 @@ ind7 = find( truetime==-1 ); %ESC
 %Add some PGC
 %ind7 = [ind7a;ind7b;ind2(s1(double(int64(length(s1)/2))+1:end))];
 
-Xstar = [linspace(0,0.8,1000)',zeros(1000,1); linspace(0,0.8,1000)',ones(1000,1); linspace(0,0.8,1000)',2*ones(1000,1); linspace(0,0.8,1000)',3*ones(1000,1); ; linspace(0,0.8,1000)',4*ones(1000,1)];
+Xstar = [linspace(0,1.1,1000)',zeros(1000,1); linspace(0,1.1,1000)',ones(1000,1); linspace(0,1.1,1000)',2*ones(1000,1); linspace(0,1.1,1000)',3*ones(1000,1); ; linspace(0,1.1,1000)',4*ones(1000,1)];
 
 %D2 = importdata('AllProcesses.csv')
 D2 = D1;
@@ -133,9 +133,9 @@ for i = 1:size(D2.data,1)-3
            
     %Joint GP (not DE). 
     pLS     = {@priorGauss,0.5,1};
+    k1={'covMaterniso',3};
+     pLS = {@priorClamped};       %Mean    
     
-       k1={'covMaterniso',3};
-        
     %First fit base process (MPGC)
     hyp.cov = [log(3);log(3)]; hyp.mean = mean(Y(:,1)); hyp.lik = log(2);
     prior.mean = {[]};  prior.cov  = {pLS;[]}; prior.lik = {[]};
@@ -156,52 +156,60 @@ for i = 1:size(D2.data,1)-3
 
        
     %Now initialise hyperparameters over ESC.
+    clear prior hyp
     k1={@covChangePointMultiD, {1, @covZero, {'covMaterniso',3}}};
-    
-    hyp.cov = [1;4;log(3);log(3)]; hyp.mean = 0; hyp.lik = log(2);
-    prior.mean = {[]};  prior.cov  = {[];[];pLS;[]}; prior.lik = {[]};
+     hyp.cov = [0.4;4;log(3);log(3)]; hyp.mean = []; hyp.lik = hyp_pN1.lik;
+    %prior.mean = {[]};  
+    prior.cov  = {[];[];pLS;[]}; prior.lik = {pLS};
     im = {@infPrior,@infExact,prior}; 
-    par1a = {'meanConst',k1,'likGauss',X(find(X(:,2)==1),1),Y(find(X(:,2)==1))-ymu1c};
-    par1b = {'meanConst',k1,'likGauss',X(find(X(:,2)==1),1),Y(find(X(:,2)==1))-ymu1c,Xstar(:,1)};
+    par1a = {'meanZero',k1,'likGauss',X(find(X(:,2)==1),1),Y(find(X(:,2)==1))-ymu1c};
+    par1b = {'meanZero',k1,'likGauss',X(find(X(:,2)==1),1),Y(find(X(:,2)==1))-ymu1c,Xstar(:,1)};
     hyp_pN2 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
     [L2 dL2] = feval(@gp,hyp_pN2, im, par1a{:});         % optimise    
     [ymu2 ys22 fmu2 fs22   ]= feval(@gp,hyp_pN2, im, par1b{:});    
     
     %Now initialise hyperparameters FPGC.
-    hyp.cov = [1;4;log(3);log(3)]; hyp.mean = 0; hyp.lik = log(2);
-    prior.mean = {[]};  prior.cov  = {[];[];pLS;[]}; prior.lik = {[]};
+    hyp.cov = [0.4;4;log(3);log(3)]; hyp.mean = []; hyp.lik =  hyp_pN1.lik;
+    %prior.mean = {[]};  
+    prior.cov  = {[];[];pLS;[]}; prior.lik = { pLS};
     
     im = {@infPrior,@infExact,prior}; 
-    par1a = {'meanConst',k1,'likGauss',X(find(X(:,2)==2),1),Y(find(X(:,2)==2))-ymu1d};
-    par1b = {'meanConst',k1,'likGauss',X(find(X(:,2)==2),1),Y(find(X(:,2)==2))-ymu1d,Xstar(:,1)};
+    par1a = {'meanZero',k1,'likGauss',X(find(X(:,2)==2),1),Y(find(X(:,2)==2))-ymu1d};
+    par1b = {'meanZero',k1,'likGauss',X(find(X(:,2)==2),1),Y(find(X(:,2)==2))-ymu1d,Xstar(:,1)};
     hyp_pN3 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
     [L3 dL3] = feval(@gp,hyp_pN3, im, par1a{:});         % optimise    
     [ymu3 ys23 fmu3 fs23   ]= feval(@gp,hyp_pN3, im, par1b{:});    
 
     
     %Now initialise hyperparameters soma.
-    hyp.cov = [1;4;log(3);log(3)]; hyp.mean = 0; hyp.lik = log(2);
-    prior.mean = {[]};  prior.cov  = {[];[];pLS;[]}; prior.lik = {[]};
+    hyp.cov = [0.4;4;log(3);log(3)]; hyp.mean = []; hyp.lik = hyp_pN1.lik;
+    %prior.mean = {[]};  
+    prior.cov  = {[];[];pLS;[]}; prior.lik = { pLS};
     
     im = {@infPrior,@infExact,prior}; 
-    par1a = {'meanConst',k1,'likGauss',X(find(X(:,2)==3),1),Y(find(X(:,2)==3))-ymu1e};
-    par1b = {'meanConst',k1,'likGauss',X(find(X(:,2)==3),1),Y(find(X(:,2)==3))-ymu1e,Xstar(:,1)};
+    par1a = {'meanZero',k1,'likGauss',X(find(X(:,2)==3),1),Y(find(X(:,2)==3))-ymu1e};
+    par1b = {'meanZero',k1,'likGauss',X(find(X(:,2)==3),1),Y(find(X(:,2)==3))-ymu1e,Xstar(:,1)};
     hyp_pN4 = feval(@minimize, hyp, @gp, -20000, im, par1a{:});         % optimise
     [L4 dL4] = feval(@gp,hyp_pN4, im, par1a{:});         % optimise        
     [ymu4 ys24 fmu4 fs24   ]= feval(@gp,hyp_pN4, im, par1b{:});                
     
-    
     %Now that we've initialised everything, let's start with more complex branching patterns.
     pLS = {@priorClamped};       %Mean
+    
     cT1 = {@priorGamma,9,.05};   %0.4, .35
     cT2 = {@priorGamma,11,.05};  %0.55, .5
     cT3 = {@priorGamma,16,.05};  %0.8, 0.75         
     pT  = {@priorGauss,3,1}; 
         
+        clear prior hyp
     %All different.    
     hyp.cov = [hyp_pN2.cov(1)+0.1;hyp_pN2.cov(2);hyp_pN2.cov(1:2);hyp_pN3.cov(1:2);hyp_pN4.cov(1:2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
     prior.mean = {[]};  prior.cov  = {cT2;pT;cT1;pT;cT1;pT;cT3;pT;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS}; prior.lik = {pLS};
+    
+    %prior.mean = {[]};  prior.cov  = {[];[];[];[];[];[];[];[];pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS}; prior.lik = {pLS};
+    
+    %prior.mean = {[]};  prior.cov  = {[];[];[];[];[];[];[];[];[];[];[];[];[];[];[];[]}; prior.lik = {pLS};    
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X,Y,Xstar};
@@ -223,9 +231,9 @@ for i = 1:size(D2.data,1)-3
     [L6 dL6] = feval(@gp,hyp_pN5, im, par1a{:});         % optimise
     [ymu6 ys26 fmu6 fs26   ]= feval(@gp,hyp_pN6, im, par1b{:});    
     
-        %keyboard
-    %Only PGC is same, all others diff
-     X2 = [x1,0*ones(size(x1,1),1); x2,0*ones(size(x2,1),1); x3,2*ones(size(x3,1),1); x4,0*ones(size(x4,1),1)]; %Only soma different        
+
+    %Only FPGC is diff
+    X2 = [x1,0*ones(size(x1,1),1); x2,0*ones(size(x2,1),1); x3,2*ones(size(x3,1),1); x4,0*ones(size(x4,1),1)];       
     hyp.cov = [4;hyp_pN2.cov(2);2;hyp_pN2.cov(2); hyp_pN3.cov(1:2); 2; hyp_pN4.cov(2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
     prior.mean = {[]};  prior.cov  = {pLS;pLS;pLS;pLS; cT1;pT; pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS}; prior.lik = {pLS};
@@ -237,7 +245,7 @@ for i = 1:size(D2.data,1)-3
     [ymu7 ys27 fmu7 fs27   ]= feval(@gp,hyp_pN7, im, par1b{:});        
 
 
-    %PGC are diff soma is same, all others diff
+    %MPG and ESC same, all others different
     X3 = [x1,0*ones(size(x1,1),1); x2,0*ones(size(x2,1),1); x3,2*ones(size(x3,1),1); x4,3*ones(size(x4,1),1)]; %Only soma different         
     hyp.cov = [4;hyp_pN2.cov(2);2;hyp_pN2.cov(2);hyp_pN3.cov(1:2); hyp_pN4.cov(1:2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
@@ -253,7 +261,7 @@ for i = 1:size(D2.data,1)-3
     %Soma and ESC are different
     X4 = [x1,0*ones(size(x1,1),1); x2,1*ones(size(x2,1),1); x3,0*ones(size(x3,1),1); x4,3*ones(size(x4,1),1)]; %Only soma different         
 
-    hyp.cov = [hyp_pN2.cov(1)+0.1;hyp_pN2.cov(2);hyp_pN2.cov(1:2);2;hyp_pN3.cov(2); hyp_pN4.cov(1:2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
+    hyp.cov = [hyp_pN2.cov(1)+0.1;hyp_pN2.cov(2);hyp_pN2.cov(1:2); 2;hyp_pN3.cov(2); hyp_pN4.cov(1:2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
     prior.mean = {[]};  prior.cov  = {cT2;pT;cT1;pT;pLS;pLS;cT3;pT;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS}; prior.lik = {pLS};
     im = {@infPrior,@infExact,prior};     
@@ -267,7 +275,7 @@ for i = 1:size(D2.data,1)-3
     %PGC and ESC are different
     X5 = [x1,0*ones(size(x1,1),1); x2,1*ones(size(x2,1),1); x3,2*ones(size(x3,1),1); x4,0*ones(size(x4,1),1)]; %Only soma different         
 
-    hyp.cov = [hyp_pN2.cov(1)+0.1;hyp_pN2.cov(2);hyp_pN2.cov(1:2);hyp_pN3.cov(1:2); 2;hyp_pN4.cov(2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
+    hyp.cov = [hyp_pN2.cov(1)+0.1;hyp_pN2.cov(2);hyp_pN2.cov(1:2); hyp_pN3.cov(1:2); 2;hyp_pN4.cov(2);  hyp_pN2.cov(3:4); hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
     prior.mean = {[]};  prior.cov  =  {cT2;pT;cT1;pT;cT1;pT;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS;pLS}; prior.lik = {pLS};
     im = {@infPrior,@infExact,prior};     
@@ -277,14 +285,13 @@ for i = 1:size(D2.data,1)-3
     [L10 dL10] = feval(@gp,hyp_pN10, im, par1a{:});         % optimise
     [ymu10 ys210 fmu10 fs210   ]= feval(@gp,hyp_pN10, im, par1b{:});            
     
-    
+
     %Store likelihoods
     L   = -[L1,L2,L3,L4,L5,L6,L7,L8,L9,L10];
     %AIC = 2*[8,4,6] - 2*L;
     %BIC = - 2*L + [8,4,6]*log(size(X,1));
 
     ESCvED{i}.gene = genes{i};
-    
     ESCvED{i}.L = L;
     %ESCvED{i}.AIC = AIC;
     %ESCvED{i}.BIC = BIC;
