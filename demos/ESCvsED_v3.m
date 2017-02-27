@@ -104,8 +104,8 @@ ind7 = find( truetime==-1 ); %ESC
 Xstar = [linspace(0,1.1,1000)',zeros(1000,1); linspace(0,1.1,1000)',ones(1000,1); linspace(0,1.1,1000)',2*ones(1000,1); linspace(0,1.1,1000)',3*ones(1000,1); ; linspace(0,1.1,1000)',4*ones(1000,1)];
 
 %D2 = importdata('AllProcesses.csv')
-D2 = D1;
-%D2 = importdata('GSE36552_and_GSE63818_all.csv');
+%D2 = D1;
+D2 = importdata('GSE36552_and_GSE63818_all.csv');
  
 genes = D2.textdata(4:end,1);
 
@@ -115,7 +115,7 @@ endind = min(endind,size(D2.data,1)-3);
 
 genes = D2.textdata(6:end,1);
 
-for i = 1:size(D2.data,1)-3
+for i = startind:endind-3
         
     x1 = Output.Param.Store{end}.update.x(ind8,1);
     x2 = Output.Param.Store{end}.update.x(ind9,1);    
