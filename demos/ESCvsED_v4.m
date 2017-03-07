@@ -171,12 +171,12 @@ for i = startind:endind-3
     [L5 dL5] = feval(@gp,hyp_pN5, im, par1a{:});         % optimise
     [ymu5 ys25 fmu5 fs25   ]= feval(@gp,hyp_pN5, im, par1b{:});
         
-    %2) Only soma is diff.
+    %2) Only soma is diff. 
     X1 = [x1,0*ones(size(x1,1),1); x2,0*ones(size(x2,1),1); x3,0*ones(size(x3,1),1); x4,3*ones(size(x4,1),1)]; %Only soma different    
 
     hyp.cov = [4;hyp_pN2.cov(2);2;hyp_pN2.cov(2); 2; hyp_pN3.cov(2); hyp_pN4.cov(1:2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  = {pLS;pLS;pLS;pLS;pLS;pLS;cT3;pT;pLS;[];pLS;[];pLS;[];pLS;[]}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  = {pC;pC;pC;pC;pC;pC;cT3;pT; pLS;[]; pC;pC; pC;pC; pLS;[]}; prior.lik = {[]};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X1,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X1,Y,Xstar};
@@ -184,11 +184,11 @@ for i = startind:endind-3
     [L6 dL6] = feval(@gp,hyp_pN5, im, par1a{:});         % optimise
     [ymu6 ys26 fmu6 fs26   ]= feval(@gp,hyp_pN6, im, par1b{:});    
 
-    %3) Only FPGC is diff ... junk
+    %3) Only FPGC is diff ... junk    
     X2 = [x1,0*ones(size(x1,1),1); x2,0*ones(size(x2,1),1); x3,2*ones(size(x3,1),1); x4,0*ones(size(x4,1),1)];       
     hyp.cov = [4;hyp_pN2.cov(2);2;hyp_pN2.cov(2); hyp_pN3.cov(1:2); 2; hyp_pN4.cov(2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  = {pC;pC;pC;pC; cT1;pT; pC;pC;pLS;[];pLS;[];pLS;[];pLS;[]}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  = {pC;pC;pC;pC; cT1;pT; pC;pC; pLS;[]; pC;pC; pLS;[]; pC;pC}; prior.lik = {[]};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X2,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X2,Y,Xstar};
@@ -196,11 +196,11 @@ for i = startind:endind-3
     [L7 dL7] = feval(@gp,hyp_pN7, im, par1a{:});         % optimise
     [ymu7 ys27 fmu7 fs27   ]= feval(@gp,hyp_pN7, im, par1b{:});        
 
-    %4) MPG and ESC same, all others different
+    %4) MPG and ESC same, all others different  
     X3 = [x1,0*ones(size(x1,1),1); x2,0*ones(size(x2,1),1); x3,2*ones(size(x3,1),1); x4,3*ones(size(x4,1),1)]; %Only soma different         
     hyp.cov = [4;hyp_pN2.cov(2);2;hyp_pN2.cov(2);hyp_pN3.cov(1:2); hyp_pN4.cov(1:2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  = {pC;pC;pC;pC;cT1;pT;cT3;pT;pLS;[];pLS;[];pLS;[];pLS;[]}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  = {pC;pC;pC;pC;cT1;pT;cT3;pT; pLS;[]; pC;pC; pLS;[]; pLS;[]}; prior.lik = {[]};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X3,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X3,Y,Xstar};
@@ -208,11 +208,11 @@ for i = startind:endind-3
     [L8 dL8] = feval(@gp,hyp_pN8, im, par1a{:});         % optimise
     [ymu8 ys28 fmu8 fs28   ]= feval(@gp,hyp_pN8, im, par1b{:});        
     
-    %5) Soma and ESC are different
+    %5) Soma and ESC are different   
     X4 = [x1,0*ones(size(x1,1),1); x2,1*ones(size(x2,1),1); x3,0*ones(size(x3,1),1); x4,3*ones(size(x4,1),1)]; %Only soma different         
     hyp.cov = [hyp_pN2.cov(1)+0.1;hyp_pN2.cov(2);hyp_pN2.cov(1:2); 2;hyp_pN3.cov(2); hyp_pN4.cov(1:2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  = {cT2;pT;cT1;pT;pC;pC;cT3;pT;pLS;[];pLS;[];pLS;[];pLS;[]}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  = {cT2;pT;cT1;pT;pC;pC;cT3;pT; pLS;[]; pLS;[]; pC;pC; pLS;[]}; prior.lik = {[]};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X4,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X4,Y,Xstar};
@@ -221,11 +221,11 @@ for i = startind:endind-3
     [ymu9 ys29 fmu9 fs29   ]= feval(@gp,hyp_pN9, im, par1b{:});        
 
 
-    %6) PGC and ESC are different
+    %6) PGC and ESC are different  
     X5 = [x1,0*ones(size(x1,1),1); x2,1*ones(size(x2,1),1); x3,2*ones(size(x3,1),1); x4,0*ones(size(x4,1),1)]; %Only soma different         
     hyp.cov = [hyp_pN2.cov(1)+0.1;hyp_pN2.cov(2);hyp_pN2.cov(1:2); hyp_pN3.cov(1:2); 2;hyp_pN4.cov(2);  hyp_pN2.cov(3:4); hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  =  {cT2;pT;cT1;pT;cT1;pT;pC;pC;pLS;[];pLS;[];pLS;[];pLS;[]}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  =  {cT2;pT;cT1;pT;cT1;pT;pC;pC; pLS;[]; pLS;[]; pLS;[];pC;pC}; prior.lik = {[]};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X5,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X5,Y,Xstar};
@@ -235,11 +235,11 @@ for i = startind:endind-3
     
 
 
-    %7) Nothing different
+    %7) Nothing different    
     X6 = [x1,0*ones(size(x1,1),1); x2,0*ones(size(x2,1),1); x3,0*ones(size(x3,1),1); x4,0*ones(size(x4,1),1)]; %Only soma different         
     hyp.cov = [4;hyp_pN2.cov(2);2;hyp_pN2.cov(2); 2; hyp_pN3.cov(2); 2; hyp_pN4.cov(2);  hyp_pN2.cov(3:4); hyp_pN3.cov(3:4); hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  =  {pC;pC;pC;pC;pC;pC;pC;pC;pLS;[];pLS;[];pLS;[];pLS;[]}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  =  {pC;pC;pC;pC;pC;pC;pC;pC;pLS;[];pC;pC;pC;pC;pC;pC}; prior.lik = {[]};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X6,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X6,Y,Xstar};
@@ -251,6 +251,8 @@ for i = startind:endind-3
     %Store likelihoods
     L   = -[L1,L2,L3,L4,L5,L6,L7,L8,L9,L10,L11];
 
+    BIC =  -2*L(5:end) + [18,   8,8,12, 14, 14, 4]*log(length(Y));
+    
     ESCvED{i}.gene = genes{i};
     ESCvED{i}.L = L;
     
