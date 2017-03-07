@@ -1,10 +1,11 @@
-function Output = Branching_Pseudotime_XCR(seed,missingT);
+function Output = Branching_Pseudotime(seed,missingT);
 
 %Add path to various toolboxes (gpml, netlab and changepoint kernels)
 addpath(genpath('../'))
 
 try %Try loading in previous run
-    load(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2D.mat'])
+    load(['~/Desktop/BranchingGPs/results/primordial_germ_cells/Pseudotime/Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2D_final.mat'])
+    %load(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2D.mat'])
     rng(Output.s) %Set random number generator to previous state   
     
     if isempty(Output.stepno)
@@ -12,7 +13,7 @@ try %Try loading in previous run
     end
         
     StartNo = Output.stepno+1; %Current step in MCMC
-    NoMCMC  = 20000;           %Final step
+    NoMCMC  = 30000;           %Final step
     Data    = Output.Data;     %Extract data ...
     L       = Output.L;        
     Prt     = Output.Pr;
@@ -35,7 +36,7 @@ catch %Initialise the pseudotime run
 
 %Reset random number generator
 rng(seed)
-NoMCMC = 10000; %No. steps in MCMC (initial run)
+NoMCMC = 30000; %No. steps in MCMC (initial run)
 
 %Grab some data ...
 [D1,t1,Type,Sex,uID,FixLabel,FixTime,Assign,nocells] = initialisedata(missingT);
@@ -98,18 +99,18 @@ for i = StartNo:NoMCMC %Begin MCMC
     
  a = rand(1,1); %Choice of move is probabilistic
     
-    if a<0.25    
+    if a<0.5    
     %Gaussian perturbation of the pseudotime time for a subset of cells    
-        if rand(1,1)<0.5 %Update many genes by small amounts
+        %if rand(1,1)<0.5 %Update many genes by small amounts
             [Data,L(i,:),Prt(i,:),u1] = updateTimeGauss(Data,L(i-1,:),Prt(i-1,:));    
             uc1 = uc1 + abs(u1); %Count accepted
             ub1 = ub1+1;         %Count tries
-        else
-            %Global cell updade. A few cells bigger jumps.
-            [Data,L(i,:),Prt(i,:),u2] = updateGlobalTimeGauss(Data,L(i-1,:),Prt(i-1,:));
-            uc2 = uc2+abs(u2);
-        end    
-    elseif a>=0.25 & a<0.5
+        %else
+        %    %Global cell updade. A few cells bigger jumps.
+        %    [Data,L(i,:),Prt(i,:),u2] = updateGlobalTimeGauss(Data,L(i-1,:),Prt(i-1,:));
+        %    uc2 = uc2+abs(u2);
+        %end    
+    elseif a>=0.5 & a<0.75
         if rand(1,1)<0.5
             %Swap the pseudotime of adjacent cells (in a given branch)
             [Data,L(i,:),Prt(i,:),u3] = updateTimeSwap(Data,L(i-1,:),Prt(i-1,:));
@@ -120,32 +121,32 @@ for i = StartNo:NoMCMC %Begin MCMC
             uc4 = uc4+abs(u4);
             ub4 = ub4+1; 
         end
-    elseif a>=0.5 & a<0.75        
+    else%if a>=0.5 & a<0.75        
         Prt(i,:) = Prt(i-1,:);
-        if rand(1,1)<0.5
+        %if rand(1,1)<0.5
             %Update the branch assignment of a single cell
             [Data,L(i,:),u5] = updateAssignment(Data,L(i-1,:));
             uc5 = uc5 + abs(u5);    
-        else
-            %Try flipping a random set of branch assignments
-            [Data,L(i,:),u6] = updateGlobalAssignment(Data,L(i-1,:));
-            uc6 = uc6 + abs(u6);                           
-        end        
-    else        
-        %if rand(1,1)<0.5
-        Prt(i,:) = Prt(i-1,:);
-%try
-        [Data,L(i,:),u7] = updateOutliers(Data,L(i-1,:),Prt(i,:));   
-%catch
-%    keyboard
-%end
         %else
-        %Marginally assign bunch.
-        %[Data,L(i,:),u8] = marginalupdateOutliers(Data,L(i-1,:));        
-        %uc6 = uc* + abs(u8);
-        %ub8 = ub8+1; 
-        %end
-        
+        %    %Try flipping a random set of branch assignments
+        %    [Data,L(i,:),u6] = updateGlobalAssignment(Data,L(i-1,:));
+        %    uc6 = uc6 + abs(u6);                           
+        %end        
+%     else        
+%         %if rand(1,1)<0.5
+%         Prt(i,:) = Prt(i-1,:);
+%         %try
+%         [Data,L(i,:),u7] = updateOutliers(Data,L(i-1,:),Prt(i,:));   
+%         %catch
+%         %    keyboard
+%         %end
+%         %else
+%         %Marginally assign bunch.
+%         %[Data,L(i,:),u8] = marginalupdateOutliers(Data,L(i-1,:));        
+%         %uc6 = uc* + abs(u8);
+%         %ub8 = ub8+1; 
+%         %end
+%         
     end    
         
     %Tune some parameters every 100 steps.
@@ -240,7 +241,7 @@ for i = StartNo:NoMCMC %Begin MCMC
              Output.stepno = i;
              Output.s = rng;
              %Output.options = options;            
-             save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2D.mat'],'Output')            
+             save(['~/Desktop/BranchingGPs/results/primordial_germ_cells/Pseudotime/Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2D_final.mat'],'Output')            
 %            save('v4Marker_Pseudotime_percent_run=1_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5c_extraupdates_transformdropout.mat')
             %save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov5c.mat'],'Output')                
             %save(['v4Marker_Pseudotime_percent_run=' num2str(seed) '_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5a_extraupdates_transformdropout.mat'],'Output')
@@ -255,7 +256,7 @@ Output.Xstar = Xstar;
 Output.stepno = i;
 Output.s = rng;
 
-save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2D.mat'],'Output')
+save(['~/Desktop/BranchingGPs/results/primordial_germ_cells/Pseudotime/Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov2D_final.mat'],'Output')
 %save('v4Marker_Pseudotime_percent_run=1_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5c_extraupdates_transformdropout.mat')
 %save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov5c.mat'],'Output') 
 %save(['v4Marker_Pseudotime_percent_run=' num2str(seed) '_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5c_extraupdates_transformdropout.mat'],'Output')
