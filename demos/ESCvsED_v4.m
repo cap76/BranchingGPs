@@ -68,7 +68,8 @@ endind = (batchi)*1000;
 endind = min(endind,size(D2.data,1));
 
 genes = D2.textdata(6:end,1);
-for i = startind:endind-3
+for i = startind:endind
+    try
         
     cT1 = {@priorGamma,9,.05};   %0.4, .35
     cT2 = {@priorGamma,11,.05};  %0.55, .5
@@ -161,7 +162,7 @@ for i = startind:endind-3
     %1) All different.    
     hyp.cov = [hyp_pN2.cov(1)+0.1;hyp_pN2.cov(2);hyp_pN2.cov(1:2);hyp_pN3.cov(1:2);hyp_pN4.cov(1:2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  = {cT2;pT;cT1;pT;cT1;pT;cT3;pT;pLS;[];pLS;[];pLS;[];pLS;[]}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  = {cT2;pT;cT1;pT;cT1;pT;cT3;pT;pLS;[];pLS;[];pLS;[];pLS;[]}; prior.lik = {pN};
         
     %prior.mean = {[]};  prior.cov  = {[];[];[];[];[];[];[];[];[];[];[];[];[];[];[];[]}; prior.lik = {pLS};    
     im = {@infPrior,@infExact,prior};     
@@ -176,7 +177,7 @@ for i = startind:endind-3
 
     hyp.cov = [4;hyp_pN2.cov(2);2;hyp_pN2.cov(2); 2; hyp_pN3.cov(2); hyp_pN4.cov(1:2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  = {pC;pC;pC;pC;pC;pC;cT3;pT; pLS;[]; pC;pC; pC;pC; pLS;[]}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  = {pC;pC;pC;pC;pC;pC;cT3;pT; pLS;[]; pC;pC; pC;pC; pLS;[]}; prior.lik = {pN};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X1,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X1,Y,Xstar};
@@ -188,7 +189,7 @@ for i = startind:endind-3
     X2 = [x1,0*ones(size(x1,1),1); x2,0*ones(size(x2,1),1); x3,2*ones(size(x3,1),1); x4,0*ones(size(x4,1),1)];       
     hyp.cov = [4;hyp_pN2.cov(2);2;hyp_pN2.cov(2); hyp_pN3.cov(1:2); 2; hyp_pN4.cov(2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  = {pC;pC;pC;pC; cT1;pT; pC;pC; pLS;[]; pC;pC; pLS;[]; pC;pC}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  = {pC;pC;pC;pC; cT1;pT; pC;pC; pLS;[]; pC;pC; pLS;[]; pC;pC}; prior.lik = {pN};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X2,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X2,Y,Xstar};
@@ -200,7 +201,7 @@ for i = startind:endind-3
     X3 = [x1,0*ones(size(x1,1),1); x2,0*ones(size(x2,1),1); x3,2*ones(size(x3,1),1); x4,3*ones(size(x4,1),1)]; %Only soma different         
     hyp.cov = [4;hyp_pN2.cov(2);2;hyp_pN2.cov(2);hyp_pN3.cov(1:2); hyp_pN4.cov(1:2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  = {pC;pC;pC;pC;cT1;pT;cT3;pT; pLS;[]; pC;pC; pLS;[]; pLS;[]}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  = {pC;pC;pC;pC;cT1;pT;cT3;pT; pLS;[]; pC;pC; pLS;[]; pLS;[]}; prior.lik = {pN};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X3,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X3,Y,Xstar};
@@ -212,7 +213,7 @@ for i = startind:endind-3
     X4 = [x1,0*ones(size(x1,1),1); x2,1*ones(size(x2,1),1); x3,0*ones(size(x3,1),1); x4,3*ones(size(x4,1),1)]; %Only soma different         
     hyp.cov = [hyp_pN2.cov(1)+0.1;hyp_pN2.cov(2);hyp_pN2.cov(1:2); 2;hyp_pN3.cov(2); hyp_pN4.cov(1:2);  hyp_pN2.cov(3:4);hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  = {cT2;pT;cT1;pT;pC;pC;cT3;pT; pLS;[]; pLS;[]; pC;pC; pLS;[]}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  = {cT2;pT;cT1;pT;pC;pC;cT3;pT; pLS;[]; pLS;[]; pC;pC; pLS;[]}; prior.lik = {pN};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X4,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X4,Y,Xstar};
@@ -221,11 +222,11 @@ for i = startind:endind-3
     [ymu9 ys29 fmu9 fs29   ]= feval(@gp,hyp_pN9, im, par1b{:});        
 
 
-    %6) PGC and ESC are different  
+    %6) PGC and ESC are different 
     X5 = [x1,0*ones(size(x1,1),1); x2,1*ones(size(x2,1),1); x3,2*ones(size(x3,1),1); x4,0*ones(size(x4,1),1)]; %Only soma different         
     hyp.cov = [hyp_pN2.cov(1)+0.1;hyp_pN2.cov(2);hyp_pN2.cov(1:2); hyp_pN3.cov(1:2); 2;hyp_pN4.cov(2);  hyp_pN2.cov(3:4); hyp_pN3.cov(3:4);hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  =  {cT2;pT;cT1;pT;cT1;pT;pC;pC; pLS;[]; pLS;[]; pLS;[];pC;pC}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  =  {cT2;pT;cT1;pT;cT1;pT;pC;pC; pLS;[]; pLS;[]; pLS;[];pC;pC}; prior.lik = {pN};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X5,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X5,Y,Xstar};
@@ -235,11 +236,11 @@ for i = startind:endind-3
     
 
 
-    %7) Nothing different    
+    %7) Nothing different     
     X6 = [x1,0*ones(size(x1,1),1); x2,0*ones(size(x2,1),1); x3,0*ones(size(x3,1),1); x4,0*ones(size(x4,1),1)]; %Only soma different         
     hyp.cov = [4;hyp_pN2.cov(2);2;hyp_pN2.cov(2); 2; hyp_pN3.cov(2); 2; hyp_pN4.cov(2);  hyp_pN2.cov(3:4); hyp_pN3.cov(3:4); hyp_pN4.cov(3:4);  hyp_pN1.cov(1:2)];
     hyp.mean = mean(Y(:,1)); hyp.lik = hyp_pN1.lik;    
-    prior.mean = {[]};  prior.cov  =  {pC;pC;pC;pC;pC;pC;pC;pC;pLS;[];pC;pC;pC;pC;pC;pC}; prior.lik = {[]};
+    prior.mean = {[]};  prior.cov  =  {pC;pC;pC;pC;pC;pC;pC;pC;pLS;[];pC;pC;pC;pC;pC;pC}; prior.lik = {pN};
     im = {@infPrior,@infExact,prior};     
     par1a = {'meanConst','covBranchingProcess_5Rec','likGauss',X6,Y};
     par1b = {'meanConst','covBranchingProcess_5Rec','likGauss',X6,Y,Xstar};
@@ -325,6 +326,9 @@ for i = startind:endind-3
 
     save(['ESCvED_1_2E_' num2str(batchi) '_AllBranching_Matern_NaokoMarkers.mat'],'ESCvED')    
     disp(['Step ' num2str(i)])
+    catch
+        ESCvED{i} = [];
+end
 
 end
 
