@@ -50,7 +50,7 @@ k1 = {'covMaterniso',3};
 k2 = {@covChangePointMultiD, {1, @covZero, {'covMaterniso',3}}};
 
 startin = (Batchi-1)*500+1;
-endin = min(Batchi*1000,28155)
+endin = min(Batchi*500,28155);
 
 for arc = startin:endin%1:size(Ya,2) %Loop over all DE genes
    
