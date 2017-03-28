@@ -148,7 +148,7 @@ for arc = startin:endin%1:size(Ya,2) %Loop over all DE genes
     
      disp(['Step ' num2str(arc) ' of ' num2str(size(Ya,2))])
     
-    save(['Stella_AllBranching_Matern_re'  num2str(Batchi) '.mat'],'Stella')   
+    save(['Stella_AllBranching_Matern_re'  num2str(Batchi) 'b.mat'],'Stella')   
         catch %Numerically unsound
         NZI(arc,1) = 0;
         Stella{arc} = [];
@@ -162,4 +162,4 @@ end
 %inds = find(NZI==1);
 %Stella = Stella(inds);
 
-save(['Stella_AllBranching_Matern_re' num2str(Batchi) '_c.mat'],'Stella')
+save(['Stella_AllBranching_Matern_re' num2str(Batchi) '_b.mat'],'Stella')
