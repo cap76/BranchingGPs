@@ -1,11 +1,11 @@
 function [Output] = Stella_allgenes(Batchi)
 
 %Load the pseudotimes
-load(['../results/primordial_germ_cells/Pseudotime/Stella_Pseudotime_' num2str(1) '__2E_final.mat'])                 
+load(['Stella_Pseudotime_' num2str(1) '__2E_final.mat']);                 
 
 %Now load in DE genes
 %DE = importdata('StellaDE.csv',',',1);
-DE = importdata('./DEall.csv',',',0)
+DE = importdata('./DEall.csv',',',0);
 
 %Now load in the expression data
 %D1 = importdata('Mouse_Yun_1a.txt');
@@ -13,7 +13,7 @@ DE = importdata('./DEall.csv',',',0)
 %D1.data(2:end,:) = log2(D1.data(2:end,:)+1);
 %D2.data(2:end,:) = log2(D2.data(2:end,:)+1);  
 %D1.data = [D1.data,D2.data]';
-D1 = importdata('./Figure_1.xlsx')
+D1 = importdata('./Figure_1.xlsx');
 D1.data(3:end,:) = log2(D1.data(3:end,:)+1);
 
 %D1 = importdata('GSE80810_RPRT_WT.csv');
@@ -109,7 +109,7 @@ for arc = startin:endin%1:size(Ya,2) %Loop over all DE genes
     
     %Now do full optimsation of joint process
     clear prior hyp
-    hyp.cov = [hyp_pN1.cov(1:2)]; hyp.mean = hyp_pN1.mean; hyp.lik = hyp_pN1.lik;
+    hyp.cov = [hyp_pN1.cov(1:2)]; hyp.mean = hyp_pN1.mean; hyp.lik = log(2);
     prior.cov = {pLS;[]}; prior.lik = {pN}; prior.mean = {[]};
     im = {@infPrior,@infExact,prior}; 
     par1a = {'meanConst',k1,'likGauss',X(:,1),Y};
