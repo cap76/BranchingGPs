@@ -699,7 +699,7 @@ for arc = 1:size(y1,1)
 
     %Only take those that are fixed and expressed
     Xtrain = [t1(find(FixLabel==1 & y1(arc,:)~=pi));Assign(find(FixLabel==1 & y1(arc,:)~=pi))]';          
-    Ytrain = y1(arc,find(FixLabel==1 & y1(arc,:)~=0))';      
+    Ytrain = y1(arc,find(FixLabel==1 & y1(arc,:)~=pi))';      
     %Initilise hyperparams (with a cheeky initial optimisation)
     im  = {@infPrior,@infExact,prior};
     par = {'meanConst','covBranchingProcess_3Rec3','likGauss', Xtrain,Ytrain};    
