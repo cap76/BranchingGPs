@@ -614,7 +614,11 @@ FL      = Data.update.FixLabel;
 Times   = Data.update.t;
 uT      = unique(Times);
 inds2up = find(FL==0);
+try
 u       = inds2up(randi([1 length(inds2up)],1,1)); %Randomly switch assignment of one data point
+catch
+    keyboard
+end
 
 if Data.update.x(u,2)==1 %Current update is branch 1
         
@@ -924,9 +928,9 @@ Assign(find(Type==0)) = randi([1 2],1,length(find(Type==0))); %Random assignment
 
 %Type(:) = -1; %Okay now lets develop amnesia over these branch labels (blastocyst).
 %t1(:) = -1;
-Type(find(t1==6 | t1==missingT))   = -1;
-FixLabel(find(t1==6 | t1==missingT)) = 0; %We will update blastocyst cells
-t1(find(t1==6 | t1==missingT))   = -1;
+Type(find(t1==7.1 | t1==missingT))   = -1;
+FixLabel(find(t1==7.1 | t1==missingT)) = 0; %We will update blastocyst cells
+t1(find(t1==7.1 | t1==missingT))   = -1;
 
 t1       = [t1];
 Sex      = [Sex];
