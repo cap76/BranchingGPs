@@ -863,7 +863,7 @@ uID  = 1:1:length(t1);          %Unique ID (for rejumbling everything later on)
 
 %inds = find(Sex==0 || Sex==2);
 
-t1(find(t1>6))=t1(find(t1>6))+1;
+t1(find(t1>6.1))=t1(find(t1>6.1))+1;
 t1(find(t1==-1))=7;
 
 
