@@ -247,7 +247,7 @@ for i = StartNo:NoMCMC
              Output.stepno = i;
              Output.s = rng;
              
-            save(['~/Desktop/BranchingGPs/results/primordial_germ_cells/Pseudotime/Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_3.mat'],'Output')                        
+            save(['~/Desktop/BranchingGPs/results/primordial_germ_cells/Pseudotime/Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_3r.mat'],'Output')                        
             %save(['~/Desktop/BranchingGPs/results/primordial_germ_cells/Pseudotime/Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_2E_final2.mat'],'Output')            
             %save(['v4Marker_Pseudotime_percent_run=' num2str(seed) '_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5a_extraupdates_transformdropout.mat'],'Output')
          end
@@ -263,7 +263,7 @@ Output.Xstar = Xstar;
 Output.stepno = i;
 Output.s = rng;
 
-save(['~/Desktop/BranchingGPs/results/primordial_germ_cells/Pseudotime/Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_3.mat'],'Output')            
+save(['~/Desktop/BranchingGPs/results/primordial_germ_cells/Pseudotime/Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_3r.mat'],'Output')            
 %save(['Marker_Pseudotime_' num2str(seed) '_' num2str(missingT) '_cov5a.mat'],'Output')            
 %save(['v4Marker_Pseudotime_percent_run=' num2str(seed) '_withESC_TimeGaussUpdate_TimeSwapUpdate_BranchUpdate_withHyperparmsII_withoutBulk_missingt6_cov5c_extraupdates_transformdropout.mat'],'Output')
 
@@ -846,6 +846,8 @@ ind_missing = [];%find(D1.data(3,:)==-1); %Get indices for the ESCs/unlabelled. 
 ind_obs     = setdiff(1:1:size(D1.data,2),ind_missing); %Index for everything else
 
 D1.data = D1.data(:,ind_obs);
+D1.data(3,:) = double(int64(D1.data(3,:)));
+
 t1   = D1.data(3,:);            %Vector of developmental stage (capture time)
 D1.data(4:end,:) = log2(D1.data(4:end,:)+1); %log_2 transform expression data
 %y1   = D1.data(4:end,:);       %Expression levels. Duplicate (remove)
@@ -920,9 +922,9 @@ Assign(find(Type==0)) = randi([1 2],1,length(find(Type==0))); %Random assignment
 
 %Type(:) = -1; %Okay now lets develop amnesia over these branch labels (blastocyst).
 %t1(:) = -1;
-Type(find(t1==6 | t1==missingT))   = -1;
+%Type(find(t1==6 | t1==missingT))   = -1;
 FixLabel(find(t1==6 | t1==missingT)) = 0; %We will update blastocyst cells
-t1(find(t1==6 | t1==missingT))   = -1;
+%t1(find(t1==6 | t1==missingT))   = -1;
 
 t1       = [t1];
 Sex      = [Sex];
